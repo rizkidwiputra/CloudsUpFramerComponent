@@ -8,6 +8,8 @@ type Player = {
     name: string
     absen: number
     avatarUrl: string
+    // --- [MODIFIKASI] Menambahkan lastName agar sesuai form ---
+    lastName?: string
     jenisHambatan?: string
     email?: string
     password?: string
@@ -181,7 +183,7 @@ const DefaultDropdownArrowIcon = () => (
     </svg>
 )
 
-// --- [FIX] KOMPONEN LOADINGDOTS YANG HILANG ---
+// --- KOMPONEN LOADINGDOTS ---
 const LoadingDots = ({ color = "#000000" }) => (
     <div
         style={{
@@ -322,15 +324,13 @@ function useModalAnimation(isOpen: boolean) {
 }
 
 // --- KOMPONEN TOMBOL UTILITAS (Internal) ---
-// [FIX] Memperbaiki state management internal (isHovered, isPressed)
-// --- [MODIFIKASI] Penambahan prop 'disabled' untuk logika validasi ---
 function UtilityButton(props) {
     const {
         text,
         onClick,
         isPrimary = true,
         isLoading = false,
-        disabled = false, // <-- [MODIFIKASI] Tambah prop disabled
+        disabled = false,
         btnHoverScale,
         btnPressedScale,
         btnTransitionDuration,
@@ -342,7 +342,6 @@ function UtilityButton(props) {
     const transitionCurve = `cubic-bezier(0.34, ${1 + btnTransitionBounce * 4}, 0.64, 1)`
     const transitionDuration = `${btnTransitionDuration}s`
 
-    // Tentukan state disabled gabungan
     const isDisabled = isLoading || disabled
 
     const baseStyle: React.CSSProperties = {
@@ -354,8 +353,8 @@ function UtilityButton(props) {
         fontWeight: 700,
         fontSize: "14px",
         lineHeight: "16px",
-        cursor: isDisabled ? "not-allowed" : "pointer", // <-- [MODIFIKASI] Ganti cursor jika disabled
-        transition: `transform ${transitionDuration} ${transitionCurve}, opacity 0.2s ease`, // <-- [MODIFIKASI] Tambah transisi opacity
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        transition: `transform ${transitionDuration} ${transitionCurve}, opacity 0.2s ease`,
     }
 
     const primaryStyle: React.CSSProperties = {
@@ -363,12 +362,12 @@ function UtilityButton(props) {
         backgroundColor: "#0066FF",
         color: "#FFFFFF",
         transform:
-            isPressed && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+            isPressed && !isDisabled
                 ? `scale(${btnPressedScale})`
-                : isHovered && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+                : isHovered && !isDisabled
                   ? `scale(${btnHoverScale})`
                   : "scale(1)",
-        opacity: isDisabled ? 0.5 : 1, // <-- [MODIFIKASI] Redup jika disabled
+        opacity: isDisabled ? 0.5 : 1,
     }
 
     const secondaryStyle: React.CSSProperties = {
@@ -377,12 +376,12 @@ function UtilityButton(props) {
         color: "#262626",
         border: "1px solid #262626",
         transform:
-            isPressed && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+            isPressed && !isDisabled
                 ? `scale(${btnPressedScale})`
-                : isHovered && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+                : isHovered && !isDisabled
                   ? `scale(${btnHoverScale})`
                   : "scale(1)",
-        opacity: isDisabled ? 0.5 : 1, // <-- [MODIFIKASI] Redup jika disabled
+        opacity: isDisabled ? 0.5 : 1,
     }
 
     const currentStyle = isPrimary ? primaryStyle : secondaryStyle
@@ -390,16 +389,15 @@ function UtilityButton(props) {
     return (
         <button
             style={currentStyle}
-            onClick={isDisabled ? undefined : onClick} // <-- [MODIFIKASI] Blok klik jika disabled
-            onMouseEnter={() => setIsHovered(true)} // <-- [FIX]
+            onClick={isDisabled ? undefined : onClick}
+            onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
-                // <-- [FIX]
                 setIsHovered(false)
                 setIsPressed(false)
             }}
-            onMouseDown={() => !isDisabled && setIsPressed(true)} // <-- [MODIFIKASI] Blok mousedown jika disabled
-            onMouseUp={() => setIsPressed(false)} // <-- [FIX]
-            disabled={isDisabled} // <-- [MODIFIKASI] Gunakan isDisabled gabungan
+            onMouseDown={() => !isDisabled && setIsPressed(true)}
+            onMouseUp={() => setIsPressed(false)}
+            disabled={isDisabled}
         >
             {isLoading ? (
                 <LoadingDots color={isPrimary ? "#FFFFFF" : "#262626"} />
@@ -411,7 +409,7 @@ function UtilityButton(props) {
 }
 
 // ========================================================================
-//  KOMPONEN INTERNAL: SearchBar (Dari referensi Anda)
+//  KOMPONEN INTERNAL: SearchBar
 // ========================================================================
 function InternalSearchBar(props) {
     const {
@@ -572,7 +570,7 @@ function InternalSearchBar(props) {
 }
 
 // ========================================================================
-//  KOMPONEN INTERNAL: AddPlayerButton (Dari referensi Anda)
+//  KOMPONEN INTERNAL: AddPlayerButton
 // ========================================================================
 function AddPlayerButton(props) {
     const {
@@ -630,7 +628,7 @@ function AddPlayerButton(props) {
         color: fontColor,
     }
     const iconStyle: React.CSSProperties = {
-        width: `${lineHeight}px`, // Samakan dengan tinggi line height
+        width: `${lineHeight}px`,
         height: `${lineHeight}px`,
         color: iconColor,
         flexShrink: 0,
@@ -704,7 +702,7 @@ function PlayerTable(props) {
         borderBottom: "1px solid #E0E0E0",
         fontSize: "14px",
         color: "#262626",
-        verticalAlign: "top", // Jaga perataan
+        verticalAlign: "top",
     }
     const playerCellStyle: React.CSSProperties = {
         ...tdStyle,
@@ -849,7 +847,7 @@ function PlayerTable(props) {
 }
 
 // ========================================================================
-//  KOMPONEN INTERNAL: InputField (Dari referensi Anda)
+//  KOMPONEN INTERNAL: InputField
 // ========================================================================
 function InputField(props) {
     const {
@@ -888,7 +886,7 @@ function InputField(props) {
     const wrapperStyle: React.CSSProperties = {
         display: "flex",
         flexDirection: "column",
-        width: "100%", // <-- FIX: Lebar 100% agar mengisi sel grid
+        width: "100%",
         height: "auto",
         fontFamily: fontFamily,
         gap: "8px",
@@ -974,15 +972,13 @@ function InputField(props) {
         color: labelAsteriskColor,
         marginLeft: "2px",
     }
-    // --- PERBAIKAN 3: Style untuk teks (Opsional) ---
     const optionalTextStyle: React.CSSProperties = {
         ...labelStyle,
-        fontWeight: 400, // Regular
-        color: placeholderColor, // Warna abu-abu
+        fontWeight: 400,
+        color: placeholderColor,
         marginLeft: "4px",
-        fontSize: "12px", // Lebih kecil
+        fontSize: "12px",
     }
-    // ---------------------------------------------
     const uniqueId = React.useId()
 
     return (
@@ -990,13 +986,11 @@ function InputField(props) {
             <div style={wrapperStyle}>
                 <label>
                     <span style={labelStyle}>{label}</span>
-                    {/* --- PERBAIKAN 3: Logika Label --- */}
                     {isRequired ? (
                         <span style={asteriskStyle}>*</span>
                     ) : (
                         <span style={optionalTextStyle}>(Opsional)</span>
                     )}
-                    {/* ---------------------------------- */}
                 </label>
                 <div style={inputContainerStyle}>
                     <style>
@@ -1011,9 +1005,7 @@ function InputField(props) {
                         onBlur={() => setIsFocused(false)}
                         placeholder={placeholder}
                         style={finalInputStyle}
-                        // --- [PERMINTAAN 1] Tambahkan title untuk tooltip ---
                         title={value || ""}
-                        // --------------------------------------------------
                     />
                 </div>
             </div>
@@ -1023,7 +1015,7 @@ function InputField(props) {
 }
 
 // ========================================================================
-//  KOMPONEN INTERNAL: DropdownField (Dari referensi Anda)
+//  KOMPONEN INTERNAL: DropdownField
 // ========================================================================
 function DropdownField(props) {
     const {
@@ -1058,7 +1050,7 @@ function DropdownField(props) {
 
     const [isFocused, setIsFocused] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null) // <-- PERBAIKAN HOVER
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const showHelpText = isInvalid
     const springEasing = "cubic-bezier(0.34, 1.56, 0.64, 1)"
@@ -1083,7 +1075,7 @@ function DropdownField(props) {
     const wrapperStyle: React.CSSProperties = {
         display: "flex",
         flexDirection: "column",
-        width: "100%", // <-- FIX: Lebar 100% agar mengisi sel grid
+        width: "100%",
         height: "auto",
         fontFamily: fontFamily,
         gap: "8px",
@@ -1095,18 +1087,13 @@ function DropdownField(props) {
         height: "56px",
     }
 
-    // --- PERBAIKAN YANG ANDA MINTA ADA DI SINI ---
-    // Style ini diterapkan pada 'div' yang menampilkan nilai terpilih.
-    // 'width: "100%"' memastikannya mengisi kontainer grid.
-    // 'overflow', 'textOverflow', dan 'whiteSpace' memastikan teks
-    // yang panjang akan terpotong (...)
     const baseInputStyle: React.CSSProperties = {
-        width: "100%", // <-- Lebar 100% agar konsisten
+        width: "100%",
         height: "100%",
         padding: "16px 40px 16px 20px",
         borderRadius: "8px",
         borderStyle: "solid",
-        boxSizing: "border-box", // <-- Penting agar padding tidak menambah lebar
+        boxSizing: "border-box",
         fontFamily: "inherit",
         fontWeight: fontWeight,
         fontSize: fontSize,
@@ -1115,15 +1102,10 @@ function DropdownField(props) {
         outline: "none",
         transition: `all 0.4s ${springEasing}`,
         cursor: "pointer",
-        appearance: "none", // Sembunyikan panah default select
-
-        // --- FIX: Truncate Text (INI YANG ANDA MINTA) ---
-        // Properti ini memastikan teks yang terlalu panjang akan
-        // dipotong dan diganti dengan elipsis (...)
+        appearance: "none",
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
-        // ----------------------------------------------
     }
 
     let dynamicInputStyle: React.CSSProperties = {}
@@ -1231,28 +1213,24 @@ function DropdownField(props) {
         color: labelAsteriskColor,
         marginLeft: "2px",
     }
-    // --- PERBAIKAN 3: Style untuk teks (Opsional) ---
     const optionalTextStyle: React.CSSProperties = {
         ...labelStyle,
-        fontWeight: 400, // Regular
-        color: placeholderColor, // Warna abu-abu
+        fontWeight: 400,
+        color: placeholderColor,
         marginLeft: "4px",
-        fontSize: "12px", // Lebih kecil
+        fontSize: "12px",
     }
-    // ---------------------------------------------
 
     return (
         <div>
             <div style={wrapperStyle} ref={dropdownRef}>
                 <label>
                     <span style={labelStyle}>{label}</span>
-                    {/* --- PERBAIKAN 3: Logika Label --- */}
                     {isRequired ? (
                         <span style={asteriskStyle}>*</span>
                     ) : (
                         <span style={optionalTextStyle}>(Opsional)</span>
                     )}
-                    {/* ---------------------------------- */}
                 </label>
                 <div
                     style={inputContainerStyle}
@@ -1261,7 +1239,6 @@ function DropdownField(props) {
                         setIsFocused(true)
                     }}
                 >
-                    {/* [PERMINTAAN 3] Tambahkan atribut 'title' untuk tooltip */}
                     <div style={finalInputStyle} title={value || ""}>
                         {value || (
                             <span style={{ color: placeholderColor }}>
@@ -1291,7 +1268,6 @@ function DropdownField(props) {
                                     setIsOpen(false)
                                     setIsFocused(false)
                                 }}
-                                // [PERMINTAAN 3] Tambahkan juga tooltip untuk item di daftar
                                 title={option}
                             >
                                 {option}
@@ -1306,7 +1282,7 @@ function DropdownField(props) {
 }
 
 // ========================================================================
-//  KOMPONEN INTERNAL: PasswordField (Dari referensi Anda)
+//  KOMPONEN INTERNAL: PasswordField
 // ========================================================================
 function PasswordField(props) {
     const {
@@ -1346,7 +1322,7 @@ function PasswordField(props) {
     const wrapperStyle: React.CSSProperties = {
         display: "flex",
         flexDirection: "column",
-        width: "100%", // <-- FIX: Lebar 100% agar mengisi sel grid
+        width: "100%",
         height: "auto",
         fontFamily: fontFamily,
         gap: "8px",
@@ -1454,15 +1430,13 @@ function PasswordField(props) {
         color: labelAsteriskColor,
         marginLeft: "2px",
     }
-    // --- PERBAIKAN 3: Style untuk teks (Opsional) ---
     const optionalTextStyle: React.CSSProperties = {
         ...labelStyle,
-        fontWeight: 400, // Regular
-        color: placeholderColor, // Warna abu-abu
+        fontWeight: 400,
+        color: placeholderColor,
         marginLeft: "4px",
-        fontSize: "12px", // Lebih kecil
+        fontSize: "12px",
     }
-    // ---------------------------------------------
     const uniqueId = React.useId()
 
     return (
@@ -1470,13 +1444,11 @@ function PasswordField(props) {
             <div style={wrapperStyle}>
                 <label>
                     <span style={labelStyle}>{label}</span>
-                    {/* --- PERBAIKAN 3: Logika Label --- */}
                     {isRequired ? (
                         <span style={asteriskStyle}>*</span>
                     ) : (
                         <span style={optionalTextStyle}>(Opsional)</span>
                     )}
-                    {/* ---------------------------------- */}
                 </label>
                 <div style={inputContainerStyle}>
                     <style>
@@ -1491,9 +1463,7 @@ function PasswordField(props) {
                         onBlur={() => setIsFocused(false)}
                         placeholder={placeholder}
                         style={finalInputStyle}
-                        // --- [PERMINTAAN 1] Tambahkan title untuk tooltip ---
                         title={value || ""}
-                        // --------------------------------------------------
                     />
                     <button
                         onMouseDown={(e) => {
@@ -1512,7 +1482,7 @@ function PasswordField(props) {
 }
 
 // ========================================================================
-//  KOMPONEN INTERNAL: ButtonLink (Dari referensi Anda)
+//  KOMPONEN INTERNAL: ButtonLink
 // ========================================================================
 function ButtonLink(props) {
     const {
@@ -1597,10 +1567,8 @@ function ModalWrapper(props) {
 
     const modalCardStyle: React.CSSProperties = {
         position: "relative",
-        // --- PERBAIKAN 2: Mengganti fit-content ---
         width: "900px",
-        maxWidth: "90%", // Fallback untuk layar kecil
-        // ------------------------------------------
+        maxWidth: "90%",
         backgroundColor: "#FFFFFF",
         borderRadius: `${modalRadius}px`,
         border: `${modalBorderWidth}px solid ${modalBorderColor}`,
@@ -1629,7 +1597,11 @@ function AddEditPlayerModal(props) {
         onClose,
         onSave,
         isEditMode,
-        initialData,
+        // --- [MODIFIKASI] Ganti initialData ke formData & onFormChange
+        // initialData,
+        formData,
+        onFormChange,
+        // ---
         // Styling
         modalRadius,
         modalBorderWidth,
@@ -1660,75 +1632,79 @@ function AddEditPlayerModal(props) {
     } = props
 
     const [isLoading, setIsLoading] = useState(false)
-    const [formData, setFormData] = useState(initialData || {})
-    // --- [PERMINTAAN 4 & 5] State untuk validasi ---
+    // --- [MODIFIKASI] Hapus state internal formData
+    // const [formData, setFormData] = useState(initialData || {})
+    // ---
     const [formErrors, setFormErrors] = useState<any>({})
-    // ----------------------------------------------
 
+    // --- [MODIFIKASI] Hapus useEffect yang me-reset formData.
+    // Ganti dengan useEffect yang HANYA me-reset error.
+    /*
     useEffect(() => {
         if (isOpen) {
             setFormData(initialData || {})
-            // --- [PERMINTAAN 4 & 5] Reset error saat modal dibuka ---
             setFormErrors({})
-            // ------------------------------------------------------
         }
     }, [isOpen, initialData])
+    */
+    useEffect(() => {
+        if (isOpen) {
+            setFormErrors({})
+        }
+    }, [isOpen])
+    // ---
 
-    // --- [PERMINTAAN 4 & 5] Fungsi validasi ---
     const validateField = (field: string, value: string) => {
         let error = ""
         if (field === "absen" && value && !/^\d+$/.test(value)) {
             error = "No. Absen harus berupa angka."
         } else if (
             field === "email" &&
-            value && // Hanya validasi jika diisi (karena opsional)
+            value &&
             !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
         ) {
             error = "Format email tidak valid."
         }
 
         setFormErrors((prev) => ({ ...prev, [field]: error }))
-        return error // Kembalikan error untuk pengecekan saat save
+        return error
     }
-    // ------------------------------------------
 
     const handleSave = () => {
-        // --- [PERMINTAAN 4 & 5] Cek validasi sebelum menyimpan ---
-        // Validasi semua field yang ada di form data
         let hasError = false
-        // --- [MODIFIKASI] Tambahkan 'jenisHambatan' ke fieldsToValidate ---
         const fieldsToValidate = ["absen", "email", "name", "jenisHambatan"]
         const newErrors = {}
 
         for (const field of fieldsToValidate) {
+            // --- [MODIFIKASI] Baca dari props formData
             const value = formData[field] || ""
             if (validateField(field, value)) {
                 hasError = true
             }
         }
 
-        // Cek error 'name' (wajib)
+        // --- [MODIFIKASI] Baca dari props formData
         if (!formData.name) {
             newErrors["name"] = "Nama Depan tidak boleh kosong."
             hasError = true
         }
 
-        // Cek error 'absen' (wajib)
+        // --- [MODIFIKASI] Baca dari props formData
         if (!formData.absen) {
             newErrors["absen"] = "Nomor Absen tidak boleh kosong."
             hasError = true
-        } else if (!/^\d+$/.test(formData.absen)) {
+        } else if (formData.absen && !/^\d+$/.test(formData.absen.toString())) {
             newErrors["absen"] = "No. Absen harus berupa angka."
             hasError = true
         }
 
-        // --- [MODIFIKASI] Cek error 'jenisHambatan' (wajib) ---
+        // --- [MODIFIKASI] Baca dari props formData
         if (!formData.jenisHambatan) {
             newErrors["jenisHambatan"] = "Jenis Hambatan tidak boleh kosong."
             hasError = true
         }
 
-        // Cek error 'email' (format)
+        // --- [MODIFIKASI] Baca dari props formData
         if (
             formData.email &&
             !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
@@ -1740,23 +1716,24 @@ function AddEditPlayerModal(props) {
         if (hasError) {
             setFormErrors((prev) => ({ ...prev, ...newErrors }))
             console.log("Validation errors, not saving.")
-            return // Jangan simpan jika ada error
+            return
         }
-        // -----------------------------------------------------
 
         setIsLoading(true)
-        // Simulasi save
         setTimeout(() => {
             setIsLoading(false)
-            onSave(formData) // Kirim data kembali
+            // --- [MODIFIKASI] Kirim props formData kembali ke parent
+            onSave(formData)
         }, 1000)
     }
 
+    // --- [MODIFIKASI] Panggil onFormChange dari props
     const handleChange = (field: string, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }))
-        // Validasi saat pengguna mengetik
+        // setFormData((prev) => ({ ...prev, [field]: value }))
+        onFormChange(field, value)
         validateField(field, value)
     }
+    // ---
 
     const closeButtonStyle: React.CSSProperties = {
         position: "absolute",
@@ -1785,7 +1762,7 @@ function AddEditPlayerModal(props) {
         flexDirection: "column",
         gap: "16px",
         textAlign: "center",
-        padding: "0 24px", // Beri padding agar tidak terlalu mepet
+        padding: "0 24px",
     }
     const modalTitleStyle: React.CSSProperties = {
         fontFamily: modalTitleFontFamily,
@@ -1829,13 +1806,9 @@ function AddEditPlayerModal(props) {
         overflow: "hidden",
     }
 
-    // --- PERBAIKAN YANG ANDA MINTA ADA DI SINI ---
-    // Style 'gridTemplateColumns: "1fr 1fr"' memaksa kedua kolom
-    // di dalam grid (yaitu kolom untuk InputField dan DropdownField)
-    // memiliki lebar yang sama (1fr atau 1 "fraction" dari sisa ruang).
     const fieldsContainerStyle: React.CSSProperties = {
         display: "grid",
-        gridTemplateColumns: "1fr 1fr", // <-- FIX: Memastikan kedua kolom punya lebar sama
+        gridTemplateColumns: "1fr 1fr",
         gap: "16px",
         flexGrow: 1,
     }
@@ -1845,13 +1818,14 @@ function AddEditPlayerModal(props) {
         marginTop: "16px",
     }
 
-    // --- [MODIFIKASI] Logika untuk mendisable tombol Simpan ---
+    // --- [MODIFIKASI] Baca dari props formData
     const isSaveDisabled =
         !formData.name ||
         !formData.absen ||
-        !formData.jenisHambatan || // Wajib diisi (sesuai gambar)
-        (!!formData.email && !formData.password) || // Jika email diisi, password wajib
-        Object.values(formErrors).some((error) => !!error) // Cek jika ada error validasi
+        !formData.jenisHambatan ||
+        (!!formData.email && !formData.password) ||
+        Object.values(formErrors).some((error) => !!error)
+    // ---
 
     return (
         <ModalWrapper isOpen={isOpen} onClose={onClose} {...props}>
@@ -1900,6 +1874,7 @@ function AddEditPlayerModal(props) {
                         />
                     </div>
 
+                    {/* Semua InputField di bawah ini sekarang membaca `formData` dari props */}
                     <div style={fieldsContainerStyle}>
                         <InputField
                             label="Nama Depan"
@@ -1907,17 +1882,15 @@ function AddEditPlayerModal(props) {
                             onChange={(v) => handleChange("name", v)}
                             placeholder="Masukkan nama depan"
                             {...formProps}
-                            // --- [PERMINTAAN 4 & 5] Validasi Wajib ---
                             isInvalid={!!formErrors.name}
                             helpText={formErrors.name || ""}
-                            isRequired={true} // Pastikan ini wajib
-                            // ----------------------------------------
+                            isRequired={true}
                         />
                         <InputField
                             label="Nama Belakang"
                             value={formData.lastName || ""}
                             onChange={(v) => handleChange("lastName", v)}
-                            placeholder="Masukkan nama belakang" // <-- PERBAIKAN 3
+                            placeholder="Masukkan nama belakang"
                             {...formProps}
                             isRequired={false}
                         />
@@ -1927,11 +1900,9 @@ function AddEditPlayerModal(props) {
                             onChange={(v) => handleChange("absen", v)}
                             placeholder="Contoh: 12"
                             {...formProps}
-                            // --- [PERMINTAAN 4] Validasi Absen ---
                             isInvalid={!!formErrors.absen}
                             helpText={formErrors.absen || ""}
-                            isRequired={true} // Pastikan ini wajib
-                            // -------------------------------------
+                            isRequired={true}
                         />
                         <DropdownField
                             label="Pilih Jenis Hambatan"
@@ -1940,27 +1911,25 @@ function AddEditPlayerModal(props) {
                             options={jenisHambatanOptions}
                             placeholder="Pilih dari daftar"
                             {...formProps}
-                            isRequired={true} // <-- [MODIFIKASI] Tandai sebagai wajib
-                            isInvalid={!!formErrors.jenisHambatan} // <-- [MODIFIKASI] Tambah cek error
-                            helpText={formErrors.jenisHambatan || ""} // <-- [MODIFIKASI] Tampilkan error
+                            isRequired={true}
+                            isInvalid={!!formErrors.jenisHambatan}
+                            helpText={formErrors.jenisHambatan || ""}
                         />
                         <InputField
                             label="Alamat Email"
                             value={formData.email || ""}
                             onChange={(v) => handleChange("email", v)}
-                            placeholder="Contoh: email@gmail.com" // <-- PERBAIKAN 3
+                            placeholder="Contoh: email@gmail.com"
                             {...formProps}
                             isRequired={false}
-                            // --- [PERMINTAAN 5] Validasi Email ---
                             isInvalid={!!formErrors.email}
                             helpText={formErrors.email || ""}
-                            // -------------------------------------
                         />
                         <PasswordField
                             label="Password"
                             value={formData.password || ""}
                             onChange={(v) => handleChange("password", v)}
-                            placeholder="Masukkan password" // <-- PERBAIKAN 3
+                            placeholder="Masukkan password"
                             {...formProps}
                             isRequired={false}
                         />
@@ -1979,7 +1948,7 @@ function AddEditPlayerModal(props) {
                         onClick={handleSave}
                         isPrimary={true}
                         isLoading={isLoading}
-                        disabled={isSaveDisabled} // <-- [MODIFIKASI] Terapkan status disabled
+                        disabled={isSaveDisabled}
                         {...props}
                     />
                 </div>
@@ -2016,7 +1985,7 @@ function SelectAvatarModal(props) {
     const modalCardStyle: React.CSSProperties = {
         position: "relative",
         width: "90%",
-        maxWidth: "500px", // Sedikit lebih lebar untuk grid
+        maxWidth: "500px",
         backgroundColor: "#FFFFFF",
         borderRadius: `${modalProps.modalRadius}px`,
         border: `${modalProps.modalBorderWidth}px solid ${modalProps.modalBorderColor}`,
@@ -2079,7 +2048,7 @@ function SelectAvatarModal(props) {
 
     const avatarGridStyle: React.CSSProperties = {
         display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)", // 4 kolom
+        gridTemplateColumns: "repeat(4, 1fr)",
         gap: "16px",
         maxHeight: "300px",
         overflowY: "auto",
@@ -2228,7 +2197,7 @@ function DeleteConfirmationModal(props) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 102, // Di atas modal lain
+        zIndex: 102,
         backdropFilter: backdropBlur ? "blur(5px)" : "none",
         WebkitBackdropFilter: backdropBlur ? "blur(5px)" : "none",
         opacity: animStyles.opacity,
@@ -2307,7 +2276,7 @@ function DeleteConfirmationModal(props) {
 }
 
 // ========================================================================
-//  [FIX] KOMPONEN TOAST NOTIFICATION YANG HILANG
+//  KOMPONEN TOAST NOTIFICATION
 // ========================================================================
 function ToastNotification(props) {
     const {
@@ -2336,7 +2305,6 @@ function ToastNotification(props) {
                 setAnimStyles({ opacity: 1, transform: "translateY(0)" })
             }, 10)
 
-            // Auto close after 3 seconds
             closeTimer = setTimeout(() => {
                 handleClose()
             }, 3000)
@@ -2437,14 +2405,9 @@ function ToastNotification(props) {
 }
 
 // ========================================================================
-//  [FIX] KOMPONEN CONFETTI CONTAINER YANG HILANG (Placeholder)
+//  KOMPONEN CONFETTI CONTAINER
 // ========================================================================
-// Placeholder untuk Confetti. Implementasi penuh memerlukan library
-// atau animasi CSS yang kompleks.
 function ConfettiContainer() {
-    // Ini hanya placeholder, tidak akan menampilkan apa-apa.
-    // Untuk confetti sungguhan, pertimbangkan library seperti 'react-confetti'
-    // jika lingkungan Framer Anda mengizinkan.
     return null
 }
 
@@ -2540,7 +2503,7 @@ export default function SectionAddPlayer(props) {
         // Avatar Modal
         avatarList,
 
-        // --- [PERMINTAAN 6] Ambil data pemain dari panel ---
+        // Konten Tabel
         table_p1_name,
         table_p1_absen,
         table_p1_avatarUrl,
@@ -2571,7 +2534,6 @@ export default function SectionAddPlayer(props) {
         table_p5_hambatan,
         table_p5_email,
         table_p5_password,
-        // --------------------------------------------------
 
         // Toast
         showConfetti,
@@ -2590,7 +2552,6 @@ export default function SectionAddPlayer(props) {
 
     const [searchTerm, setSearchTerm] = useState("")
 
-    // --- [PERMINTAAN 6] Konstruksi data pemain dari props panel ---
     const players = useMemo(() => {
         const constructedPlayerList = [
             {
@@ -2638,9 +2599,8 @@ export default function SectionAddPlayer(props) {
                 email: table_p5_email,
                 password: table_p5_password,
             },
-        ].filter((p) => p.name && p.absen) // Hanya tampilkan jika nama & absen ada
+        ].filter((p) => p.name && p.absen)
 
-        // Jika tidak ada data dari panel, gunakan default
         if (constructedPlayerList.length === 0) {
             return defaultPlayerList
         }
@@ -2677,30 +2637,24 @@ export default function SectionAddPlayer(props) {
         table_p5_email,
         table_p5_password,
     ])
-    // -------------------------------------------------------------
 
-    // --- [PERMINTAAN 7] Proses avatarList dari panel ---
     const processedAvatarList = useMemo(() => {
         if (avatarList && avatarList.length > 0) {
-            // avatarList dari props adalah string[]
             return avatarList.map((url, index) => ({
                 id: index + 1,
                 url:
                     url ||
-                    `https://placehold.co/100x100/CCCCCC/FFFFFF?text=A${index + 1}`, // Fallback jika URL kosong
+                    `https://placehold.co/100x100/CCCCCC/FFFFFF?text=A${index + 1}`,
             }))
         }
-        return defaultAvatarList // Fallback ke default jika panel kosong
+        return defaultAvatarList
     }, [avatarList])
-    // -------------------------------------------------
 
     const [playerData, setPlayerData] = useState<Player[]>(players)
 
-    // --- [PERMINTAAN 6] Update state jika props dari panel berubah ---
     useEffect(() => {
         setPlayerData(players)
     }, [players])
-    // ---------------------------------------------------------------
 
     // State Modal
     const [modalMode, setModalMode] = useState<
@@ -2708,7 +2662,11 @@ export default function SectionAddPlayer(props) {
     >(null)
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
     const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null)
-    const [tempAvatar, setTempAvatar] = useState<string | undefined>(undefined) // Untuk avatar di modal tambah/edit
+    const [tempAvatar, setTempAvatar] = useState<string | undefined>(undefined)
+
+    // --- [PERBAIKAN] State untuk data formulir diangkat ke sini
+    const [modalFormData, setModalFormData] = useState<Partial<Player>>({})
+    // ---
 
     // State Toast & Loading
     const [isLoading, setIsLoading] = useState(false)
@@ -2728,17 +2686,21 @@ export default function SectionAddPlayer(props) {
 
     // --- HANDLERS ---
 
+    // --- [PERBAIKAN] Modifikasi handler untuk atur modalFormData
     const handleOpenAddModal = () => {
-        setSelectedPlayer(null) // Pastikan tidak ada data
-        setTempAvatar(undefined) // Reset avatar
+        setSelectedPlayer(null)
+        setTempAvatar(undefined)
+        setModalFormData({}) // Reset form data saat "tambah"
         setModalMode("add")
     }
 
     const handleOpenEditModal = (player: Player) => {
         setSelectedPlayer(player)
-        setTempAvatar(player.avatarUrl) // Set avatar yg ada
+        setTempAvatar(player.avatarUrl)
+        setModalFormData(player) // Isi form data dengan data pemain
         setModalMode("edit")
     }
+    // ---
 
     const handleOpenDeleteModal = (player: Player) => {
         setSelectedPlayer(player)
@@ -2746,9 +2708,7 @@ export default function SectionAddPlayer(props) {
     }
 
     const handleOpenAvatarModal = () => {
-        // --- [PERMINTAAN 7] Gunakan processedAvatarList untuk mencari ---
         const current = processedAvatarList.find((a) => a.url === tempAvatar)
-        // --------------------------------------------------------------
         setSelectedAvatar(current || null)
         setModalMode("avatar")
     }
@@ -2760,26 +2720,32 @@ export default function SectionAddPlayer(props) {
     // Menyimpan avatar dari Modal Avatar ke Modal Edit/Tambah
     const handleSaveAvatar = () => {
         setTempAvatar(selectedAvatar?.url)
-        setModalMode(selectedPlayer ? "edit" : "add") // Kembali ke modal sebelumnya
+        setModalMode(selectedPlayer ? "edit" : "add")
     }
 
+    // --- [PERBAIKAN] Handler untuk update modalFormData dari anak
+    const handleModalFormChange = (field: string, value: any) => {
+        setModalFormData((prev) => ({ ...prev, [field]: value }))
+    }
+    // ---
+
     // Menyimpan dari Modal Tambah/Edit
-    const handleSavePlayer = (formData: Player) => {
+    // --- [PERBAIKAN] 'formData' sekarang datang sebagai argumen
+    const handleSavePlayer = (formData: Partial<Player>) => {
         const toastTitle = modalMode === "add" ? toastAddTitle : toastEditTitle
         const toastMessage = modalMode === "add" ? toastAddDesc : toastEditDesc
 
-        // Logika simpan (di sini kita hanya update state)
         if (modalMode === "add") {
             const newPlayer = {
                 ...formData,
                 id: Date.now(),
                 avatarUrl: tempAvatar,
-            } // ID unik baru
+            } as Player
             setPlayerData((prev) => [newPlayer, ...prev])
         } else {
             setPlayerData((prev) =>
                 prev.map((p) =>
-                    p.id === selectedPlayer.id
+                    p.id === selectedPlayer!.id // selectedPlayer pasti ada saat mode edit
                         ? { ...p, ...formData, avatarUrl: tempAvatar }
                         : p
                 )
@@ -2789,13 +2755,14 @@ export default function SectionAddPlayer(props) {
         handleCloseModals()
         setToastInfo({ show: true, title: toastTitle, message: toastMessage })
     }
+    // ---
 
     // Konfirmasi Hapus
     const handleDeletePlayer = () => {
         setIsLoading(true)
         setTimeout(() => {
             setPlayerData((prev) =>
-                prev.filter((p) => p.id !== selectedPlayer.id)
+                prev.filter((p) => p.id !== selectedPlayer!.id)
             )
             setIsLoading(false)
             handleCloseModals()
@@ -2812,7 +2779,7 @@ export default function SectionAddPlayer(props) {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: "24px", // Jarak antara bar atas dan tabel
+        gap: "24px",
     }
 
     const topBarContainerStyle: React.CSSProperties = {
@@ -2822,7 +2789,7 @@ export default function SectionAddPlayer(props) {
     }
 
     const searchBarWrapperStyle: React.CSSProperties = {
-        flexGrow: 1, // Mengisi ruang
+        flexGrow: 1,
     }
 
     return (
@@ -2888,7 +2855,11 @@ export default function SectionAddPlayer(props) {
                 onClose={handleCloseModals}
                 onSave={handleSavePlayer}
                 isEditMode={modalMode === "edit"}
-                initialData={selectedPlayer}
+                // --- [PERBAIKAN] Ganti `initialData` dengan `formData` dan `onFormChange`
+                // initialData={selectedPlayer}
+                formData={modalFormData}
+                onFormChange={handleModalFormChange}
+                // ---
                 currentAvatar={tempAvatar}
                 onEditAvatarClick={handleOpenAvatarModal}
                 // Styling
@@ -2940,11 +2911,9 @@ export default function SectionAddPlayer(props) {
             {/* Modal Pilih Avatar */}
             <SelectAvatarModal
                 isOpen={modalMode === "avatar"}
-                onClose={() => setModalMode(selectedPlayer ? "edit" : "add")} // Kembali ke modal sblmnya
+                onClose={() => setModalMode(selectedPlayer ? "edit" : "add")}
                 onSave={handleSaveAvatar}
-                // --- [PERMINTAAN 7] Gunakan processedAvatarList ---
                 avatarList={processedAvatarList}
-                // ----------------------------------------------
                 selectedAvatar={selectedAvatar}
                 onSelectAvatar={setSelectedAvatar}
                 // Styling
@@ -2984,7 +2953,6 @@ export default function SectionAddPlayer(props) {
             />
 
             {/* Toast Notifikasi */}
-            {/* [FIX] Mengganti showToast menjadi toastInfo.show */}
             {toastInfo.show && props.showConfetti && <ConfettiContainer />}
             <ToastNotification
                 isOpen={toastInfo.show}
@@ -3409,9 +3377,7 @@ addPropertyControls(SectionAddPlayer, {
         type: ControlType.Enum,
         options: [400, 500, 600, 700],
         optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
-        // --- PERBAIKAN 1: Font Weight Medium ---
         defaultValue: 500,
-        // -------------------------------------
         category: "Styling Input Form",
     },
     inputFontSize: {
@@ -3478,7 +3444,7 @@ addPropertyControls(SectionAddPlayer, {
         category: "Styling Input Form",
     },
 
-    // --- [PERMINTAAN 7] Konten Modal Avatar ---
+    // --- Konten Modal Avatar ---
     avatarList: {
         title: "Daftar Avatar",
         type: ControlType.Array,
@@ -3487,7 +3453,7 @@ addPropertyControls(SectionAddPlayer, {
         category: "Konten Modal Avatar",
     },
 
-    // --- [PERMINTAAN 6] Konten Tabel Pemain ---
+    // --- Konten Tabel Pemain ---
     table_p1_name: {
         title: "P1: Nama",
         type: ControlType.String,
@@ -3503,7 +3469,7 @@ addPropertyControls(SectionAddPlayer, {
     table_p1_avatarUrl: {
         title: "P1: Avatar",
         type: ControlType.Image,
-        defaultValue: "https://placehold.co/100x100/E82D2F/FFFFFF?text=HS", // Contoh inisial
+        defaultValue: "https://placehold.co/100x100/E82D2F/FFFFFF?text=HS",
         category: "Konten Tabel Pemain",
     },
     table_p1_hambatan: {
@@ -3540,7 +3506,7 @@ addPropertyControls(SectionAddPlayer, {
     table_p2_avatarUrl: {
         title: "P2: Avatar",
         type: ControlType.Image,
-        defaultValue: "https://placehold.co/100x100/0066FF/FFFFFF?text=DK", // Contoh inisial
+        defaultValue: "https://placehold.co/100x100/0066FF/FFFFFF?text=DK",
         category: "Konten Tabel Pemain",
     },
     table_p2_hambatan: {
@@ -3577,7 +3543,7 @@ addPropertyControls(SectionAddPlayer, {
     table_p3_avatarUrl: {
         title: "P3: Avatar",
         type: ControlType.Image,
-        defaultValue: "https://placehold.co/100x100/09DE1B/FFFFFF?text=AA", // Contoh inisial
+        defaultValue: "https://placehold.co/100x100/09DE1B/FFFFFF?text=AA",
         category: "Konten Tabel Pemain",
     },
     table_p3_hambatan: {
@@ -3614,7 +3580,7 @@ addPropertyControls(SectionAddPlayer, {
     table_p4_avatarUrl: {
         title: "P4: Avatar",
         type: ControlType.Image,
-        defaultValue: "https://placehold.co/100x100/FFC700/FFFFFF?text=AM", // Contoh inisial
+        defaultValue: "https://placehold.co/100x100/FFC700/FFFFFF?text=AM",
         category: "Konten Tabel Pemain",
     },
     table_p4_hambatan: {
@@ -3651,7 +3617,7 @@ addPropertyControls(SectionAddPlayer, {
     table_p5_avatarUrl: {
         title: "P5: Avatar",
         type: ControlType.Image,
-        defaultValue: "https://placehold.co/100x100/8A2BE2/FFFFFF?text=AW", // Contoh inisial
+        defaultValue: "https://placehold.co/100x100/8A2BE2/FFFFFF?text=AW",
         category: "Konten Tabel Pemain",
     },
     table_p5_hambatan: {
@@ -3748,4 +3714,3 @@ addPropertyControls(SectionAddPlayer, {
         category: "Toast Notification",
     },
 })
-
