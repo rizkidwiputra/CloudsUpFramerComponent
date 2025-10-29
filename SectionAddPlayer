@@ -1094,6 +1094,12 @@ function DropdownField(props) {
         width: "100%",
         height: "56px",
     }
+
+    // --- PERBAIKAN YANG ANDA MINTA ADA DI SINI ---
+    // Style ini diterapkan pada 'div' yang menampilkan nilai terpilih.
+    // 'width: "100%"' memastikannya mengisi kontainer grid.
+    // 'overflow', 'textOverflow', dan 'whiteSpace' memastikan teks
+    // yang panjang akan terpotong (...)
     const baseInputStyle: React.CSSProperties = {
         width: "100%", // <-- Lebar 100% agar konsisten
         height: "100%",
@@ -1111,13 +1117,13 @@ function DropdownField(props) {
         cursor: "pointer",
         appearance: "none", // Sembunyikan panah default select
 
-        // --- FIX: Truncate Text ---
+        // --- FIX: Truncate Text (INI YANG ANDA MINTA) ---
         // Properti ini memastikan teks yang terlalu panjang akan
         // dipotong dan diganti dengan elipsis (...)
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
-        // -------------------------
+        // ----------------------------------------------
     }
 
     let dynamicInputStyle: React.CSSProperties = {}
@@ -1822,6 +1828,11 @@ function AddEditPlayerModal(props) {
         color: "#BFBFBF",
         overflow: "hidden",
     }
+
+    // --- PERBAIKAN YANG ANDA MINTA ADA DI SINI ---
+    // Style 'gridTemplateColumns: "1fr 1fr"' memaksa kedua kolom
+    // di dalam grid (yaitu kolom untuk InputField dan DropdownField)
+    // memiliki lebar yang sama (1fr atau 1 "fraction" dari sisa ruang).
     const fieldsContainerStyle: React.CSSProperties = {
         display: "grid",
         gridTemplateColumns: "1fr 1fr", // <-- FIX: Memastikan kedua kolom punya lebar sama
@@ -3737,3 +3748,4 @@ addPropertyControls(SectionAddPlayer, {
         category: "Toast Notification",
     },
 })
+
