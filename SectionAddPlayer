@@ -1,0 +1,3739 @@
+import * as React from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
+import { addPropertyControls, ControlType } from "framer"
+
+// --- TIPE DATA ---
+type Player = {
+    id: number
+    name: string
+    absen: number
+    avatarUrl: string
+    jenisHambatan?: string
+    email?: string
+    password?: string
+}
+
+type Avatar = {
+    id: number
+    url: string
+}
+
+// --- KUMPULAN IKON DEFAULT ---
+const DefaultSearchIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+)
+const DefaultClearIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+)
+const DefaultPlusIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+)
+const DefaultCloseIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+)
+const DefaultAvatarIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+)
+const DefaultCheckIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM16.7071 9.29289C17.0976 9.68342 17.0976 10.3166 16.7071 10.7071L11.7071 15.7071C11.3166 16.0976 10.6834 16.0976 10.2929 15.7071L7.29289 12.7071C6.90237 12.3166 6.90237 11.6834 7.29289 11.2929C7.68342 10.9024 8.31658 10.9024 8.70711 11.2929L11 13.5858L15.2929 9.29289C15.6834 8.90237 16.3166 8.90237 16.7071 9.29289Z"
+            fill="currentColor"
+        />
+    </svg>
+)
+const DefaultEditIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+)
+const DefaultDeleteIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+)
+const DefaultEyeIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+        <circle cx="12" cy="12" r="3" />
+    </svg>
+)
+const DefaultDropdownArrowIcon = () => (
+    <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+)
+
+// --- [FIX] KOMPONEN LOADINGDOTS YANG HILANG ---
+const LoadingDots = ({ color = "#000000" }) => (
+    <div
+        style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "16px",
+        }}
+    >
+        <style>
+            {`
+            .dot {
+                width: 6px;
+                height: 6px;
+                margin: 0 2px;
+                background-color: ${color};
+                border-radius: 50%;
+                animation: bounce 1.4s infinite ease-in-out both;
+            }
+            .dot:nth-child(1) { animation-delay: -0.32s; }
+            .dot:nth-child(2) { animation-delay: -0.16s; }
+            @keyframes bounce {
+                0%, 80%, 100% { transform: scale(0); }
+                40% { transform: scale(1.0); }
+            }
+            `}
+        </style>
+        <div className="dot"></div>
+        <div className="dot"></div>
+        <div className="dot"></div>
+    </div>
+)
+
+// --- DATA & KONSTANTA ---
+const defaultPlayerList: Player[] = [
+    {
+        id: 1,
+        name: "Hana Sharifah",
+        absen: 12,
+        avatarUrl: "",
+        jenisHambatan: "[ADHD] Attention Deficit Hyperactivity Disorder",
+        email: "hanasharifah45@gmail.com",
+        password: "password123",
+    },
+    {
+        id: 2,
+        name: "Danentara Kusuma",
+        absen: 13,
+        avatarUrl: "",
+        jenisHambatan: "[ASD] Autism Spectrum Disorder",
+        email: "danentara.k@gmail.com",
+        password: "password123",
+    },
+    {
+        id: 3,
+        name: "Arkana Al-Husna",
+        absen: 14,
+        avatarUrl: "",
+        jenisHambatan: "[DS] Down Syndrome",
+        email: "arkana.husna@gmail.com",
+        password: "password123",
+    },
+    {
+        id: 4,
+        name: "Ananda Mikhail",
+        absen: 15,
+        avatarUrl: "",
+        jenisHambatan: "[DCD] Development Coordination Disorder",
+    },
+    {
+        id: 5,
+        name: "Agil Jordi Wardhana",
+        absen: 16,
+        avatarUrl: "",
+        jenisHambatan: "[CP] Cerebral Palsy",
+    },
+]
+
+const defaultAvatarList: Avatar[] = [
+    { id: 1, url: "https://placehold.co/100x100/E82D2F/FFFFFF?text=A1" },
+    { id: 2, url: "https://placehold.co/100x100/0066FF/FFFFFF?text=A2" },
+    { id: 3, url: "https://placehold.co/100x100/09DE1B/FFFFFF?text=A3" },
+    { id: 4, url: "https://placehold.co/100x100/FFC700/FFFFFF?text=A4" },
+    { id: 5, url: "https://placehold.co/100x100/8A2BE2/FFFFFF?text=A5" },
+    { id: 6, url: "https://placehold.co/100x100/FF7F50/FFFFFF?text=A6" },
+    { id: 7, url: "https://placehold.co/100x100/20B2AA/FFFFFF?text=A7" },
+    { id: 8, url: "https://placehold.co/100x100/DC143C/FFFFFF?text=A8" },
+    { id: 9, url: "https://placehold.co/100x100/E82D2F/FFFFFF?text=A9" },
+    { id: 10, url: "https://placehold.co/100x100/0066FF/FFFFFF?text=A10" },
+    { id: 11, url: "https://placehold.co/100x100/09DE1B/FFFFFF?text=A11" },
+    { id: 12, url: "https://placehold.co/100x100/FFC700/FFFFFF?text=A12" },
+    { id: 13, url: "https://placehold.co/100x100/8A2BE2/FFFFFF?text=A13" },
+    { id: 14, url: "https://placehold.co/100x100/FF7F50/FFFFFF?text=A14" },
+    { id: 15, url: "https://placehold.co/100x100/20B2AA/FFFFFF?text=A15" },
+    { id: 16, url: "https://placehold.co/100x100/DC143C/FFFFFF?text=A16" },
+]
+
+const jenisHambatanOptions = [
+    "[ADHD] Attention Deficit Hyperactivity Disorder",
+    "[ASD] Autism Spectrum Disorder",
+    "[DS] Down Syndrome",
+    "[DCD] Development Coordination Disorder",
+    "[CP] Cerebral Palsy",
+]
+
+const springEasing = "cubic-bezier(0.34, 1.56, 0.64, 1)"
+const modalAnimationDuration = 200
+
+// --- KOMPONEN HOOK UNTUK ANIMASI MODAL ---
+function useModalAnimation(isOpen: boolean) {
+    const [isRendered, setIsRendered] = useState(false)
+    const [animStyles, setAnimStyles] = useState({
+        opacity: 0,
+        transform: "scale(0.95) translateY(10px)",
+    })
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsRendered(true)
+            setTimeout(() => {
+                setAnimStyles({
+                    opacity: 1,
+                    transform: "scale(1) translateY(0)",
+                })
+            }, 10)
+        } else if (!isOpen && isRendered) {
+            setAnimStyles({
+                opacity: 0,
+                transform: "scale(0.95) translateY(10px)",
+            })
+            setTimeout(() => {
+                setIsRendered(false)
+            }, modalAnimationDuration)
+        }
+    }, [isOpen, isRendered])
+
+    return { isRendered, animStyles }
+}
+
+// --- KOMPONEN TOMBOL UTILITAS (Internal) ---
+// [FIX] Memperbaiki state management internal (isHovered, isPressed)
+// --- [MODIFIKASI] Penambahan prop 'disabled' untuk logika validasi ---
+function UtilityButton(props) {
+    const {
+        text,
+        onClick,
+        isPrimary = true,
+        isLoading = false,
+        disabled = false, // <-- [MODIFIKASI] Tambah prop disabled
+        btnHoverScale,
+        btnPressedScale,
+        btnTransitionDuration,
+        btnTransitionBounce,
+    } = props
+
+    const [isHovered, setIsHovered] = useState(false)
+    const [isPressed, setIsPressed] = useState(false)
+    const transitionCurve = `cubic-bezier(0.34, ${1 + btnTransitionBounce * 4}, 0.64, 1)`
+    const transitionDuration = `${btnTransitionDuration}s`
+
+    // Tentukan state disabled gabungan
+    const isDisabled = isLoading || disabled
+
+    const baseStyle: React.CSSProperties = {
+        flex: 1,
+        padding: "16px",
+        borderRadius: "8px",
+        border: "none",
+        fontFamily: "Raleway",
+        fontWeight: 700,
+        fontSize: "14px",
+        lineHeight: "16px",
+        cursor: isDisabled ? "not-allowed" : "pointer", // <-- [MODIFIKASI] Ganti cursor jika disabled
+        transition: `transform ${transitionDuration} ${transitionCurve}, opacity 0.2s ease`, // <-- [MODIFIKASI] Tambah transisi opacity
+    }
+
+    const primaryStyle: React.CSSProperties = {
+        ...baseStyle,
+        backgroundColor: "#0066FF",
+        color: "#FFFFFF",
+        transform:
+            isPressed && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+                ? `scale(${btnPressedScale})`
+                : isHovered && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+                  ? `scale(${btnHoverScale})`
+                  : "scale(1)",
+        opacity: isDisabled ? 0.5 : 1, // <-- [MODIFIKASI] Redup jika disabled
+    }
+
+    const secondaryStyle: React.CSSProperties = {
+        ...baseStyle,
+        backgroundColor: "#FFFFFF",
+        color: "#262626",
+        border: "1px solid #262626",
+        transform:
+            isPressed && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+                ? `scale(${btnPressedScale})`
+                : isHovered && !isDisabled // <-- [MODIFIKASI] Cek isDisabled
+                  ? `scale(${btnHoverScale})`
+                  : "scale(1)",
+        opacity: isDisabled ? 0.5 : 1, // <-- [MODIFIKASI] Redup jika disabled
+    }
+
+    const currentStyle = isPrimary ? primaryStyle : secondaryStyle
+
+    return (
+        <button
+            style={currentStyle}
+            onClick={isDisabled ? undefined : onClick} // <-- [MODIFIKASI] Blok klik jika disabled
+            onMouseEnter={() => setIsHovered(true)} // <-- [FIX]
+            onMouseLeave={() => {
+                // <-- [FIX]
+                setIsHovered(false)
+                setIsPressed(false)
+            }}
+            onMouseDown={() => !isDisabled && setIsPressed(true)} // <-- [MODIFIKASI] Blok mousedown jika disabled
+            onMouseUp={() => setIsPressed(false)} // <-- [FIX]
+            disabled={isDisabled} // <-- [MODIFIKASI] Gunakan isDisabled gabungan
+        >
+            {isLoading ? (
+                <LoadingDots color={isPrimary ? "#FFFFFF" : "#262626"} />
+            ) : (
+                text
+            )}
+        </button>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: SearchBar (Dari referensi Anda)
+// ========================================================================
+function InternalSearchBar(props) {
+    const {
+        value,
+        onChange,
+        placeholder,
+        fontFamily,
+        fontWeight,
+        fontSize,
+        fontColor,
+        placeholderColor,
+        defaultFill,
+        defaultBorderColor,
+        defaultBorderWidth,
+        focusFill,
+        focusBorderColor,
+        searchIcon,
+        clearIcon,
+        iconColor,
+        iconFocusColor,
+    } = props
+
+    const [isFocused, setIsFocused] = React.useState(false)
+    const springEasing = "cubic-bezier(0.34, 1.56, 0.64, 1)"
+
+    const inputContainerStyle: React.CSSProperties = {
+        position: "relative",
+        width: "100%",
+        height: "56px",
+    }
+    const searchIconStyle: React.CSSProperties = {
+        position: "absolute",
+        top: "50%",
+        left: "20px",
+        transform: "translateY(-50%)",
+        width: "20px",
+        height: "20px",
+        pointerEvents: "none",
+        color: isFocused ? iconFocusColor : iconColor,
+        transition: `color 0.4s ${springEasing}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    }
+    const clearButtonStyle: React.CSSProperties = {
+        position: "absolute",
+        right: "20px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: isFocused ? iconFocusColor : iconColor,
+        transition: `color 0.4s ${springEasing}`,
+        opacity: value.length > 0 ? 1 : 0,
+        pointerEvents: value.length > 0 ? "auto" : "none",
+        width: "20px",
+        height: "20px",
+    }
+    const customIconStyle: React.CSSProperties = {
+        width: "20px",
+        height: "20px",
+        display: "block",
+        backgroundColor: "currentColor",
+        maskSize: "contain",
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+    }
+    const baseInputStyle: React.CSSProperties = {
+        width: "100%",
+        height: "100%",
+        padding: "16px 52px",
+        borderRadius: "8px",
+        borderStyle: "solid",
+        boxSizing: "border-box",
+        fontFamily: fontFamily,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+        color: fontColor,
+        lineHeight: "1.5em",
+        outline: "none",
+        transition: `all 0.4s ${springEasing}`,
+    }
+    let dynamicInputStyle: React.CSSProperties = {}
+    if (isFocused) {
+        dynamicInputStyle = {
+            backgroundColor: focusFill,
+            borderColor: focusBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${focusBorderColor}`,
+        }
+    } else {
+        dynamicInputStyle = {
+            backgroundColor: defaultFill,
+            borderColor: defaultBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: "none",
+        }
+    }
+    const finalInputStyle = { ...baseInputStyle, ...dynamicInputStyle }
+    const uniqueId = React.useId()
+
+    return (
+        <div style={inputContainerStyle}>
+            <style>
+                {` input[data-id="${uniqueId}"]::placeholder { color: ${placeholderColor}; opacity: 1; } `}
+                {` input[type="search"]::-webkit-search-cancel-button { display: none; }`}
+            </style>
+            <div style={searchIconStyle}>
+                {searchIcon ? (
+                    <span
+                        style={{
+                            ...customIconStyle,
+                            maskImage: `url(${searchIcon})`,
+                            WebkitMaskImage: `url(${searchIcon})`,
+                        }}
+                    />
+                ) : (
+                    <DefaultSearchIcon />
+                )}
+            </div>
+            <input
+                data-id={uniqueId}
+                type="search"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                placeholder={placeholder}
+                style={finalInputStyle}
+            />
+            <button
+                onClick={() => onChange("")}
+                style={clearButtonStyle}
+                aria-label="Clear search"
+            >
+                {clearIcon ? (
+                    <span
+                        style={{
+                            ...customIconStyle,
+                            maskImage: `url(${clearIcon})`,
+                            WebkitMaskImage: `url(${clearIcon})`,
+                        }}
+                    />
+                ) : (
+                    <DefaultClearIcon />
+                )}
+            </button>
+        </div>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: AddPlayerButton (Dari referensi Anda)
+// ========================================================================
+function AddPlayerButton(props) {
+    const {
+        text,
+        icon,
+        iconColor,
+        fontFamily,
+        fontWeight,
+        fontSize,
+        lineHeight,
+        fontColor,
+        bgColor,
+        radius,
+        borderWidth,
+        borderColor,
+        shadow1,
+        shadow2,
+        hoverScale,
+        pressedScale,
+        transitionDuration,
+        transitionBounce,
+        onClick,
+    } = props
+
+    const [isHovered, setIsHovered] = useState(false)
+    const [isPressed, setIsPressed] = useState(false)
+    const transitionCurve = `cubic-bezier(0.34, ${1 + transitionBounce * 4}, 0.64, 1)`
+    const duration = `${transitionDuration}s`
+
+    const buttonStyle: React.CSSProperties = {
+        display: "flex",
+        width: "fit-content",
+        height: "fit-content",
+        padding: "16px",
+        backgroundColor: bgColor,
+        borderRadius: `${radius}px`,
+        border: `${borderWidth}px solid ${borderColor}`,
+        boxShadow: `${shadow1}, ${shadow2}`,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "8px",
+        cursor: "pointer",
+        transition: `transform ${duration} ${transitionCurve}`,
+        transform: isPressed
+            ? `scale(${pressedScale})`
+            : isHovered
+              ? `scale(${hoverScale})`
+              : "scale(1)",
+    }
+    const textStyle: React.CSSProperties = {
+        fontFamily: fontFamily,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+        lineHeight: `${lineHeight}px`,
+        color: fontColor,
+    }
+    const iconStyle: React.CSSProperties = {
+        width: `${lineHeight}px`, // Samakan dengan tinggi line height
+        height: `${lineHeight}px`,
+        color: iconColor,
+        flexShrink: 0,
+    }
+    const customIconStyle: React.CSSProperties = {
+        width: "100%",
+        height: "100%",
+        display: "block",
+        backgroundColor: "currentColor",
+        maskSize: "contain",
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+    }
+
+    return (
+        <button
+            style={buttonStyle}
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => {
+                setIsHovered(false)
+                setIsPressed(false)
+            }}
+            onMouseDown={() => setIsPressed(true)}
+            onMouseUp={() => setIsPressed(false)}
+        >
+            <span style={textStyle}>{text}</span>
+            <div style={iconStyle}>
+                {icon ? (
+                    <span
+                        style={{
+                            ...customIconStyle,
+                            maskImage: `url(${icon})`,
+                            WebkitMaskImage: `url(${icon})`,
+                        }}
+                    />
+                ) : (
+                    <DefaultPlusIcon />
+                )}
+            </div>
+        </button>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: PlayerTable
+// ========================================================================
+function PlayerTable(props) {
+    const { players, onEdit, onDelete } = props
+    const [passwordVisibility, setPasswordVisibility] = useState({})
+
+    const tableStyle: React.CSSProperties = {
+        width: "100%",
+        borderCollapse: "collapse",
+        fontFamily: "Raleway, sans-serif",
+    }
+    const thStyle: React.CSSProperties = {
+        textAlign: "left",
+        padding: "12px 16px",
+        fontSize: "12px",
+        fontWeight: 600,
+        color: "#595959",
+        borderBottom: "1px solid #E0E0E0",
+        textTransform: "uppercase",
+    }
+    const tdStyle: React.CSSProperties = {
+        padding: "16px",
+        borderBottom: "1px solid #E0E0E0",
+        fontSize: "14px",
+        color: "#262626",
+        verticalAlign: "top", // Jaga perataan
+    }
+    const playerCellStyle: React.CSSProperties = {
+        ...tdStyle,
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+    }
+    const avatarStyle: React.CSSProperties = {
+        width: "40px",
+        height: "40px",
+        borderRadius: "50%",
+        backgroundColor: "#E0E0E0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#595959",
+        overflow: "hidden",
+        flexShrink: 0,
+    }
+    const nameStyle: React.CSSProperties = { fontWeight: 600 }
+    const absenStyle: React.CSSProperties = {
+        fontSize: "12px",
+        color: "#595959",
+        marginTop: "2px",
+    }
+
+    const passwordStyle: React.CSSProperties = {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+    }
+    const eyeIconStyle: React.CSSProperties = {
+        width: "16px",
+        height: "16px",
+        cursor: "pointer",
+        color: "#8C8C8C",
+    }
+    const actionStyle: React.CSSProperties = {
+        ...tdStyle,
+        display: "flex",
+        gap: "16px",
+    }
+    const actionIconStyle: React.CSSProperties = {
+        width: "20px",
+        height: "20px",
+        cursor: "pointer",
+        transition: "color 0.2s ease, transform 0.2s ease",
+    }
+
+    const togglePassword = (id) => {
+        setPasswordVisibility((prev) => ({ ...prev, [id]: !prev[id] }))
+    }
+
+    return (
+        <table style={tableStyle}>
+            <thead>
+                <tr>
+                    <th style={thStyle}>Daftar Pemain</th>
+                    <th style={thStyle}>Jenis Hambatan</th>
+                    <th style={thStyle}>Email</th>
+                    <th style={thStyle}>Password</th>
+                    <th style={thStyle}>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {players.map((player) => (
+                    <tr key={player.id}>
+                        {/* 1. Daftar Pemain */}
+                        <td style={playerCellStyle}>
+                            <div style={avatarStyle}>
+                                {player.avatarUrl ? (
+                                    <img
+                                        src={player.avatarUrl}
+                                        alt={player.name}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ objectFit: "cover" }}
+                                    />
+                                ) : (
+                                    <DefaultAvatarIcon />
+                                )}
+                            </div>
+                            <div>
+                                <div style={nameStyle}>{player.name}</div>
+                                <div style={absenStyle}>
+                                    Absen: {player.absen}
+                                </div>
+                            </div>
+                        </td>
+
+                        {/* 2. Jenis Hambatan */}
+                        <td style={tdStyle}>{player.jenisHambatan || "-"}</td>
+
+                        {/* 3. Email */}
+                        <td style={tdStyle}>
+                            {player.email || "Belum Ditambahkan"}
+                        </td>
+
+                        {/* 4. Password */}
+                        <td style={tdStyle}>
+                            {player.password ? (
+                                <div style={passwordStyle}>
+                                    <span>
+                                        {passwordVisibility[player.id]
+                                            ? player.password
+                                            : "••••••••"}
+                                    </span>
+                                    <div
+                                        style={eyeIconStyle}
+                                        onClick={() =>
+                                            togglePassword(player.id)
+                                        }
+                                    >
+                                        <DefaultEyeIcon />
+                                    </div>
+                                </div>
+                            ) : (
+                                "Belum Ditambahkan"
+                            )}
+                        </td>
+
+                        {/* 5. Aksi */}
+                        <td style={actionStyle}>
+                            <div
+                                style={{ ...actionIconStyle, color: "#0066FF" }}
+                                onClick={() => onEdit(player)}
+                            >
+                                <DefaultEditIcon />
+                            </div>
+                            <div
+                                style={{ ...actionIconStyle, color: "#E82D2F" }}
+                                onClick={() => onDelete(player)}
+                            >
+                                <DefaultDeleteIcon />
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: InputField (Dari referensi Anda)
+// ========================================================================
+function InputField(props) {
+    const {
+        value,
+        onChange,
+        placeholder,
+        isInvalid,
+        helpText,
+        fontFamily,
+        fontWeight,
+        fontSize,
+        fontColor,
+        placeholderColor,
+        defaultFill,
+        defaultBorderColor,
+        defaultBorderWidth,
+        focusFill,
+        focusBorderColor,
+        invalidFill,
+        invalidBorderColor,
+        label,
+        labelFontFamily,
+        labelFontWeight,
+        labelFontSize,
+        labelLetterSpacing,
+        labelLineHeight,
+        labelTextColor,
+        labelAsteriskColor,
+        isRequired = true,
+    } = props
+
+    const [isFocused, setIsFocused] = React.useState(false)
+    const showHelpText = isInvalid
+    const springEasing = "cubic-bezier(0.34, 1.56, 0.64, 1)"
+
+    const wrapperStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        width: "100%", // <-- FIX: Lebar 100% agar mengisi sel grid
+        height: "auto",
+        fontFamily: fontFamily,
+        gap: "8px",
+    }
+    const inputContainerStyle: React.CSSProperties = {
+        position: "relative",
+        width: "100%",
+        height: "56px",
+    }
+    const baseInputStyle: React.CSSProperties = {
+        width: "100%",
+        height: "100%",
+        padding: "16px 20px",
+        borderRadius: "8px",
+        borderStyle: "solid",
+        boxSizing: "border-box",
+        fontFamily: "inherit",
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+        color: fontColor,
+        lineHeight: "1.5em",
+        outline: "none",
+        transition: `all 0.4s ${springEasing}`,
+    }
+    const helpTextStyle: React.CSSProperties = {
+        margin: 0,
+        fontFamily: "'Raleway', sans-serif",
+        fontWeight: "normal",
+        fontSize: "12px",
+        color: invalidBorderColor,
+        letterSpacing: "0.4px",
+        lineHeight: "16px",
+        paddingLeft: "4px",
+        opacity: 0,
+        maxHeight: "0px",
+        overflow: "hidden",
+        transition: `opacity 0.3s ${springEasing}, max-height 0.3s ${springEasing}, margin-top 0.3s ${springEasing}`,
+    }
+
+    let dynamicInputStyle: React.CSSProperties = {}
+    if (showHelpText) {
+        dynamicInputStyle = {
+            backgroundColor: invalidFill,
+            borderColor: invalidBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${invalidBorderColor}`,
+        }
+    } else if (isFocused) {
+        dynamicInputStyle = {
+            backgroundColor: focusFill,
+            borderColor: focusBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${focusBorderColor}`,
+        }
+    } else {
+        dynamicInputStyle = {
+            backgroundColor: defaultFill,
+            borderColor: defaultBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: "none",
+        }
+    }
+
+    const finalInputStyle = { ...baseInputStyle, ...dynamicInputStyle }
+    const dynamicHelpTextStyle: React.CSSProperties = {
+        ...helpTextStyle,
+        opacity: showHelpText ? 1 : 0,
+        maxHeight: showHelpText ? "30px" : "0px",
+        marginTop: showHelpText ? "4px" : "0px",
+    }
+
+    const labelStyle: React.CSSProperties = {
+        fontFamily: labelFontFamily,
+        fontWeight: labelFontWeight,
+        fontSize: labelFontSize,
+        color: labelTextColor,
+        letterSpacing: `${labelLetterSpacing}px`,
+        lineHeight: `${labelLineHeight}px`,
+        display: "inline",
+    }
+    const asteriskStyle: React.CSSProperties = {
+        ...labelStyle,
+        color: labelAsteriskColor,
+        marginLeft: "2px",
+    }
+    // --- PERBAIKAN 3: Style untuk teks (Opsional) ---
+    const optionalTextStyle: React.CSSProperties = {
+        ...labelStyle,
+        fontWeight: 400, // Regular
+        color: placeholderColor, // Warna abu-abu
+        marginLeft: "4px",
+        fontSize: "12px", // Lebih kecil
+    }
+    // ---------------------------------------------
+    const uniqueId = React.useId()
+
+    return (
+        <div>
+            <div style={wrapperStyle}>
+                <label>
+                    <span style={labelStyle}>{label}</span>
+                    {/* --- PERBAIKAN 3: Logika Label --- */}
+                    {isRequired ? (
+                        <span style={asteriskStyle}>*</span>
+                    ) : (
+                        <span style={optionalTextStyle}>(Opsional)</span>
+                    )}
+                    {/* ---------------------------------- */}
+                </label>
+                <div style={inputContainerStyle}>
+                    <style>
+                        {` input[data-id="${uniqueId}"]::placeholder { color: ${placeholderColor}; opacity: 1; } `}
+                    </style>
+                    <input
+                        data-id={uniqueId}
+                        type="text"
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        placeholder={placeholder}
+                        style={finalInputStyle}
+                        // --- [PERMINTAAN 1] Tambahkan title untuk tooltip ---
+                        title={value || ""}
+                        // --------------------------------------------------
+                    />
+                </div>
+            </div>
+            <p style={dynamicHelpTextStyle}>{helpText}</p>
+        </div>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: DropdownField (Dari referensi Anda)
+// ========================================================================
+function DropdownField(props) {
+    const {
+        value,
+        onChange,
+        placeholder,
+        options,
+        isInvalid,
+        helpText,
+        fontFamily,
+        fontWeight,
+        fontSize,
+        fontColor,
+        placeholderColor,
+        defaultFill,
+        defaultBorderColor,
+        defaultBorderWidth,
+        focusFill,
+        focusBorderColor,
+        invalidFill,
+        invalidBorderColor,
+        label,
+        labelFontFamily,
+        labelFontWeight,
+        labelFontSize,
+        labelLetterSpacing,
+        labelLineHeight,
+        labelTextColor,
+        labelAsteriskColor,
+        isRequired = true,
+    } = props
+
+    const [isFocused, setIsFocused] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null) // <-- PERBAIKAN HOVER
+    const dropdownRef = useRef<HTMLDivElement>(null)
+    const showHelpText = isInvalid
+    const springEasing = "cubic-bezier(0.34, 1.56, 0.64, 1)"
+    const uniqueId = React.useId()
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsOpen(false)
+                setIsFocused(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+        }
+    }, [dropdownRef])
+
+    const wrapperStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        width: "100%", // <-- FIX: Lebar 100% agar mengisi sel grid
+        height: "auto",
+        fontFamily: fontFamily,
+        gap: "8px",
+        position: "relative",
+    }
+    const inputContainerStyle: React.CSSProperties = {
+        position: "relative",
+        width: "100%",
+        height: "56px",
+    }
+    const baseInputStyle: React.CSSProperties = {
+        width: "100%", // <-- Lebar 100% agar konsisten
+        height: "100%",
+        padding: "16px 40px 16px 20px",
+        borderRadius: "8px",
+        borderStyle: "solid",
+        boxSizing: "border-box", // <-- Penting agar padding tidak menambah lebar
+        fontFamily: "inherit",
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+        color: fontColor,
+        lineHeight: "1.5em",
+        outline: "none",
+        transition: `all 0.4s ${springEasing}`,
+        cursor: "pointer",
+        appearance: "none", // Sembunyikan panah default select
+
+        // --- FIX: Truncate Text ---
+        // Properti ini memastikan teks yang terlalu panjang akan
+        // dipotong dan diganti dengan elipsis (...)
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        // -------------------------
+    }
+
+    let dynamicInputStyle: React.CSSProperties = {}
+    if (showHelpText) {
+        dynamicInputStyle = {
+            backgroundColor: invalidFill,
+            borderColor: invalidBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${invalidBorderColor}`,
+        }
+    } else if (isFocused || isOpen) {
+        dynamicInputStyle = {
+            backgroundColor: focusFill,
+            borderColor: focusBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${focusBorderColor}`,
+        }
+    } else {
+        dynamicInputStyle = {
+            backgroundColor: defaultFill,
+            borderColor: defaultBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: "none",
+        }
+    }
+
+    const finalInputStyle = { ...baseInputStyle, ...dynamicInputStyle }
+
+    const helpTextStyle: React.CSSProperties = {
+        margin: 0,
+        fontFamily: "'Raleway', sans-serif",
+        fontWeight: "normal",
+        fontSize: "12px",
+        color: invalidBorderColor,
+        letterSpacing: "0.4px",
+        lineHeight: "16px",
+        paddingLeft: "4px",
+        opacity: 0,
+        maxHeight: "0px",
+        overflow: "hidden",
+        transition: `opacity 0.3s ${springEasing}, max-height 0.3s ${springEasing}, margin-top 0.3s ${springEasing}`,
+    }
+    const dynamicHelpTextStyle: React.CSSProperties = {
+        ...helpTextStyle,
+        opacity: showHelpText ? 1 : 0,
+        maxHeight: showHelpText ? "30px" : "0px",
+        marginTop: showHelpText ? "4px" : "0px",
+    }
+
+    const iconContainerStyle: React.CSSProperties = {
+        position: "absolute",
+        right: "20px",
+        top: "50%",
+        transform: `translateY(-50%) ${isOpen ? "rotate(180deg)" : "rotate(0deg)"}`,
+        width: `20px`,
+        height: `20px`,
+        pointerEvents: "none",
+        color: showHelpText
+            ? invalidBorderColor
+            : isFocused || isOpen
+              ? focusBorderColor
+              : defaultBorderColor,
+        transition: `transform 0.3s ${springEasing}, color 0.4s ${springEasing}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    }
+
+    const dropdownListStyle: React.CSSProperties = {
+        position: "absolute",
+        top: "100%",
+        left: 0,
+        right: 0,
+        backgroundColor: "#FFFFFF",
+        border: `1px solid ${focusBorderColor}`,
+        borderRadius: "8px",
+        marginTop: "4px",
+        maxHeight: "200px",
+        overflowY: "auto",
+        zIndex: 10,
+        display: isOpen ? "block" : "none",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    }
+    const dropdownItemStyle: React.CSSProperties = {
+        padding: "12px 20px",
+        fontFamily: fontFamily,
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+        color: fontColor,
+        cursor: "pointer",
+        transition: "background-color 0.2s ease, color 0.2s ease",
+    }
+
+    const labelStyle: React.CSSProperties = {
+        fontFamily: labelFontFamily,
+        fontWeight: labelFontWeight,
+        fontSize: labelFontSize,
+        color: labelTextColor,
+        letterSpacing: `${labelLetterSpacing}px`,
+        lineHeight: `${labelLineHeight}px`,
+        display: "inline",
+    }
+    const asteriskStyle: React.CSSProperties = {
+        ...labelStyle,
+        color: labelAsteriskColor,
+        marginLeft: "2px",
+    }
+    // --- PERBAIKAN 3: Style untuk teks (Opsional) ---
+    const optionalTextStyle: React.CSSProperties = {
+        ...labelStyle,
+        fontWeight: 400, // Regular
+        color: placeholderColor, // Warna abu-abu
+        marginLeft: "4px",
+        fontSize: "12px", // Lebih kecil
+    }
+    // ---------------------------------------------
+
+    return (
+        <div>
+            <div style={wrapperStyle} ref={dropdownRef}>
+                <label>
+                    <span style={labelStyle}>{label}</span>
+                    {/* --- PERBAIKAN 3: Logika Label --- */}
+                    {isRequired ? (
+                        <span style={asteriskStyle}>*</span>
+                    ) : (
+                        <span style={optionalTextStyle}>(Opsional)</span>
+                    )}
+                    {/* ---------------------------------- */}
+                </label>
+                <div
+                    style={inputContainerStyle}
+                    onClick={() => {
+                        setIsOpen(!isOpen)
+                        setIsFocused(true)
+                    }}
+                >
+                    {/* [PERMINTAAN 3] Tambahkan atribut 'title' untuk tooltip */}
+                    <div style={finalInputStyle} title={value || ""}>
+                        {value || (
+                            <span style={{ color: placeholderColor }}>
+                                {placeholder}
+                            </span>
+                        )}
+                    </div>
+                    <div style={iconContainerStyle}>
+                        <DefaultDropdownArrowIcon />
+                    </div>
+
+                    <div style={dropdownListStyle}>
+                        {options.map((option, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    ...dropdownItemStyle,
+                                    ...(hoveredIndex === index && {
+                                        backgroundColor: focusFill,
+                                        color: focusBorderColor,
+                                    }),
+                                }}
+                                onMouseEnter={() => setHoveredIndex(index)}
+                                onMouseLeave={() => setHoveredIndex(null)}
+                                onMouseDown={() => {
+                                    onChange(option)
+                                    setIsOpen(false)
+                                    setIsFocused(false)
+                                }}
+                                // [PERMINTAAN 3] Tambahkan juga tooltip untuk item di daftar
+                                title={option}
+                            >
+                                {option}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <p style={dynamicHelpTextStyle}>{helpText}</p>
+        </div>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: PasswordField (Dari referensi Anda)
+// ========================================================================
+function PasswordField(props) {
+    const {
+        value,
+        onChange,
+        placeholder,
+        isInvalid,
+        helpText,
+        fontFamily,
+        fontWeight,
+        fontSize,
+        fontColor,
+        placeholderColor,
+        defaultFill,
+        defaultBorderColor,
+        defaultBorderWidth,
+        focusFill,
+        focusBorderColor,
+        invalidFill,
+        invalidBorderColor,
+        label,
+        labelFontFamily,
+        labelFontWeight,
+        labelFontSize,
+        labelLetterSpacing,
+        labelLineHeight,
+        labelTextColor,
+        labelAsteriskColor,
+        isRequired = true,
+    } = props
+
+    const [isFocused, setIsFocused] = React.useState(false)
+    const [isVisible, setIsVisible] = React.useState(false)
+    const showHelpText = isInvalid
+    const springEasing = "cubic-bezier(0.34, 1.56, 0.64, 1)"
+
+    const wrapperStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        width: "100%", // <-- FIX: Lebar 100% agar mengisi sel grid
+        height: "auto",
+        fontFamily: fontFamily,
+        gap: "8px",
+    }
+    const inputContainerStyle: React.CSSProperties = {
+        position: "relative",
+        width: "100%",
+        height: "56px",
+    }
+    const baseInputStyle: React.CSSProperties = {
+        width: "100%",
+        height: "100%",
+        padding: "16px 48px 16px 20px",
+        borderRadius: "8px",
+        borderStyle: "solid",
+        boxSizing: "border-box",
+        fontFamily: "inherit",
+        fontWeight: fontWeight,
+        fontSize: fontSize,
+        color: fontColor,
+        lineHeight: "1.5em",
+        outline: "none",
+        transition: `all 0.4s ${springEasing}`,
+    }
+    const helpTextStyle: React.CSSProperties = {
+        margin: 0,
+        fontFamily: "'Raleway', sans-serif",
+        fontWeight: "normal",
+        fontSize: "12px",
+        color: invalidBorderColor,
+        letterSpacing: "0.4px",
+        lineHeight: "16px",
+        paddingLeft: "4px",
+        opacity: 0,
+        maxHeight: "0px",
+        overflow: "hidden",
+        transition: `opacity 0.3s ${springEasing}, max-height 0.3s ${springEasing}, margin-top 0.3s ${springEasing}`,
+    }
+
+    let dynamicInputStyle: React.CSSProperties = {}
+    if (showHelpText) {
+        dynamicInputStyle = {
+            backgroundColor: invalidFill,
+            borderColor: invalidBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${invalidBorderColor}`,
+        }
+    } else if (isFocused) {
+        dynamicInputStyle = {
+            backgroundColor: focusFill,
+            borderColor: focusBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: `inset 0 0 0 1px ${focusBorderColor}`,
+        }
+    } else {
+        dynamicInputStyle = {
+            backgroundColor: defaultFill,
+            borderColor: defaultBorderColor,
+            borderWidth: defaultBorderWidth,
+            boxShadow: "none",
+        }
+    }
+
+    const finalInputStyle = { ...baseInputStyle, ...dynamicInputStyle }
+    const dynamicHelpTextStyle: React.CSSProperties = {
+        ...helpTextStyle,
+        opacity: showHelpText ? 1 : 0,
+        maxHeight: showHelpText ? "30px" : "0px",
+        marginTop: showHelpText ? "4px" : "0px",
+    }
+
+    const buttonStyle: React.CSSProperties = {
+        position: "absolute",
+        right: "20px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: showHelpText
+            ? invalidBorderColor
+            : isFocused
+              ? focusBorderColor
+              : defaultBorderColor,
+        transition: `color 0.4s ${springEasing}`,
+        width: "20px",
+        height: "20px",
+    }
+
+    const labelStyle: React.CSSProperties = {
+        fontFamily: labelFontFamily,
+        fontWeight: labelFontWeight,
+        fontSize: labelFontSize,
+        color: labelTextColor,
+        letterSpacing: `${labelLetterSpacing}px`,
+        lineHeight: `${labelLineHeight}px`,
+        display: "inline",
+    }
+    const asteriskStyle: React.CSSProperties = {
+        ...labelStyle,
+        color: labelAsteriskColor,
+        marginLeft: "2px",
+    }
+    // --- PERBAIKAN 3: Style untuk teks (Opsional) ---
+    const optionalTextStyle: React.CSSProperties = {
+        ...labelStyle,
+        fontWeight: 400, // Regular
+        color: placeholderColor, // Warna abu-abu
+        marginLeft: "4px",
+        fontSize: "12px", // Lebih kecil
+    }
+    // ---------------------------------------------
+    const uniqueId = React.useId()
+
+    return (
+        <div>
+            <div style={wrapperStyle}>
+                <label>
+                    <span style={labelStyle}>{label}</span>
+                    {/* --- PERBAIKAN 3: Logika Label --- */}
+                    {isRequired ? (
+                        <span style={asteriskStyle}>*</span>
+                    ) : (
+                        <span style={optionalTextStyle}>(Opsional)</span>
+                    )}
+                    {/* ---------------------------------- */}
+                </label>
+                <div style={inputContainerStyle}>
+                    <style>
+                        {` input[data-id="${uniqueId}"]::placeholder { color: ${placeholderColor}; opacity: 1; } `}
+                    </style>
+                    <input
+                        data-id={uniqueId}
+                        type={isVisible ? "text" : "password"}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        placeholder={placeholder}
+                        style={finalInputStyle}
+                        // --- [PERMINTAAN 1] Tambahkan title untuk tooltip ---
+                        title={value || ""}
+                        // --------------------------------------------------
+                    />
+                    <button
+                        onMouseDown={(e) => {
+                            e.preventDefault()
+                            setIsVisible(!isVisible)
+                        }}
+                        style={buttonStyle}
+                    >
+                        <DefaultEyeIcon />
+                    </button>
+                </div>
+            </div>
+            <p style={dynamicHelpTextStyle}>{helpText}</p>
+        </div>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: ButtonLink (Dari referensi Anda)
+// ========================================================================
+function ButtonLink(props) {
+    const {
+        text,
+        onClick,
+        fontFamily,
+        fontSize,
+        fontWeight,
+        color,
+        hoverColor,
+        textAlign,
+    } = props
+    const [isHovered, setIsHovered] = useState(false)
+
+    const style: React.CSSProperties = {
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: isHovered ? hoverColor : color,
+        textDecoration: isHovered ? "underline" : "none",
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        textAlign: textAlign,
+        width: "100%",
+        transition: "color 0.2s ease, text-decoration 0.2s ease",
+    }
+
+    return (
+        <button
+            style={style}
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {text}
+        </button>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: Modal Wrapper
+// ========================================================================
+function ModalWrapper(props) {
+    const {
+        isOpen,
+        onClose,
+        children,
+        backdropColor,
+        backdropBlur,
+        modalRadius,
+        modalBorderWidth,
+        modalBorderColor,
+        modalShadow,
+    } = props
+
+    const { isRendered, animStyles } = useModalAnimation(isOpen)
+    const modalRef = useRef<HTMLDivElement>(null)
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (modalRef.current && e.target === modalRef.current) {
+            onClose()
+        }
+    }
+
+    if (!isRendered) return null
+
+    const backdropStyle: React.CSSProperties = {
+        position: "fixed",
+        inset: 0,
+        backgroundColor: backdropColor,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 100,
+        backdropFilter: backdropBlur ? "blur(5px)" : "none",
+        WebkitBackdropFilter: backdropBlur ? "blur(5px)" : "none",
+        opacity: animStyles.opacity,
+        transition: `opacity ${modalAnimationDuration}ms ease-in-out`,
+    }
+
+    const modalCardStyle: React.CSSProperties = {
+        position: "relative",
+        // --- PERBAIKAN 2: Mengganti fit-content ---
+        width: "900px",
+        maxWidth: "90%", // Fallback untuk layar kecil
+        // ------------------------------------------
+        backgroundColor: "#FFFFFF",
+        borderRadius: `${modalRadius}px`,
+        border: `${modalBorderWidth}px solid ${modalBorderColor}`,
+        boxShadow: modalShadow,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        opacity: animStyles.opacity,
+        transform: animStyles.transform,
+        transition: `opacity ${modalAnimationDuration}ms ease, transform ${modalAnimationDuration}ms ease`,
+    }
+
+    return (
+        <div style={backdropStyle} ref={modalRef} onClick={handleBackdropClick}>
+            <div style={modalCardStyle}>{children}</div>
+        </div>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: Modal Tambah/Edit Pemain
+// ========================================================================
+function AddEditPlayerModal(props) {
+    const {
+        isOpen,
+        onClose,
+        onSave,
+        isEditMode,
+        initialData,
+        // Styling
+        modalRadius,
+        modalBorderWidth,
+        modalBorderColor,
+        modalShadow,
+        modalTitle,
+        modalDesc,
+        modalTitleFontFamily,
+        modalTitleFontWeight,
+        modalTitleFontSize,
+        modalTitleColor,
+        modalDescFontFamily,
+        modalDescFontWeight,
+        modalDescFontSize,
+        modalDescColor,
+        // Tombol
+        btnConfirmText,
+        btnCancelText,
+        btnHoverScale,
+        btnPressedScale,
+        btnTransitionDuration,
+        btnTransitionBounce,
+        // Avatar
+        onEditAvatarClick,
+        currentAvatar,
+        // Form
+        ...formProps
+    } = props
+
+    const [isLoading, setIsLoading] = useState(false)
+    const [formData, setFormData] = useState(initialData || {})
+    // --- [PERMINTAAN 4 & 5] State untuk validasi ---
+    const [formErrors, setFormErrors] = useState<any>({})
+    // ----------------------------------------------
+
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData || {})
+            // --- [PERMINTAAN 4 & 5] Reset error saat modal dibuka ---
+            setFormErrors({})
+            // ------------------------------------------------------
+        }
+    }, [isOpen, initialData])
+
+    // --- [PERMINTAAN 4 & 5] Fungsi validasi ---
+    const validateField = (field: string, value: string) => {
+        let error = ""
+        if (field === "absen" && value && !/^\d+$/.test(value)) {
+            error = "No. Absen harus berupa angka."
+        } else if (
+            field === "email" &&
+            value && // Hanya validasi jika diisi (karena opsional)
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        ) {
+            error = "Format email tidak valid."
+        }
+
+        setFormErrors((prev) => ({ ...prev, [field]: error }))
+        return error // Kembalikan error untuk pengecekan saat save
+    }
+    // ------------------------------------------
+
+    const handleSave = () => {
+        // --- [PERMINTAAN 4 & 5] Cek validasi sebelum menyimpan ---
+        // Validasi semua field yang ada di form data
+        let hasError = false
+        // --- [MODIFIKASI] Tambahkan 'jenisHambatan' ke fieldsToValidate ---
+        const fieldsToValidate = ["absen", "email", "name", "jenisHambatan"]
+        const newErrors = {}
+
+        for (const field of fieldsToValidate) {
+            const value = formData[field] || ""
+            if (validateField(field, value)) {
+                hasError = true
+            }
+        }
+
+        // Cek error 'name' (wajib)
+        if (!formData.name) {
+            newErrors["name"] = "Nama Depan tidak boleh kosong."
+            hasError = true
+        }
+
+        // Cek error 'absen' (wajib)
+        if (!formData.absen) {
+            newErrors["absen"] = "Nomor Absen tidak boleh kosong."
+            hasError = true
+        } else if (!/^\d+$/.test(formData.absen)) {
+            newErrors["absen"] = "No. Absen harus berupa angka."
+            hasError = true
+        }
+
+        // --- [MODIFIKASI] Cek error 'jenisHambatan' (wajib) ---
+        if (!formData.jenisHambatan) {
+            newErrors["jenisHambatan"] = "Jenis Hambatan tidak boleh kosong."
+            hasError = true
+        }
+
+        // Cek error 'email' (format)
+        if (
+            formData.email &&
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+        ) {
+            newErrors["email"] = "Format email tidak valid."
+            hasError = true
+        }
+
+        if (hasError) {
+            setFormErrors((prev) => ({ ...prev, ...newErrors }))
+            console.log("Validation errors, not saving.")
+            return // Jangan simpan jika ada error
+        }
+        // -----------------------------------------------------
+
+        setIsLoading(true)
+        // Simulasi save
+        setTimeout(() => {
+            setIsLoading(false)
+            onSave(formData) // Kirim data kembali
+        }, 1000)
+    }
+
+    const handleChange = (field: string, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }))
+        // Validasi saat pengguna mengetik
+        validateField(field, value)
+    }
+
+    const closeButtonStyle: React.CSSProperties = {
+        position: "absolute",
+        top: "16px",
+        right: "16px",
+        width: "24px",
+        height: "24px",
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        color: "#8C8C8C",
+        opacity: 0.7,
+        transition: "opacity 0.2s ease",
+        zIndex: 10,
+    }
+
+    const contentWrapperStyle: React.CSSProperties = {
+        padding: "24px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+    }
+    const titleContainerStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        textAlign: "center",
+        padding: "0 24px", // Beri padding agar tidak terlalu mepet
+    }
+    const modalTitleStyle: React.CSSProperties = {
+        fontFamily: modalTitleFontFamily,
+        fontWeight: modalTitleFontWeight,
+        fontSize: modalTitleFontSize,
+        color: modalTitleColor,
+        lineHeight: `${modalTitleFontSize * 1.33}px`,
+        margin: 0,
+    }
+    const modalDescStyle: React.CSSProperties = {
+        fontFamily: modalDescFontFamily,
+        fontWeight: modalDescFontWeight,
+        fontSize: modalDescFontSize,
+        color: modalDescColor,
+        lineHeight: `${modalDescFontSize * 1.4}px`,
+        margin: 0,
+    }
+    const formContainerStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "row",
+        gap: "24px",
+        alignItems: "flex-start",
+    }
+    const avatarContainerStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "16px",
+        width: "220px",
+        flexShrink: 0,
+    }
+    const avatarPreviewStyle: React.CSSProperties = {
+        width: "220px",
+        height: "220px",
+        borderRadius: "50%",
+        backgroundColor: "#F0F0F0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#BFBFBF",
+        overflow: "hidden",
+    }
+    const fieldsContainerStyle: React.CSSProperties = {
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr", // <-- FIX: Memastikan kedua kolom punya lebar sama
+        gap: "16px",
+        flexGrow: 1,
+    }
+    const modalButtonContainerStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "24px",
+        marginTop: "16px",
+    }
+
+    // --- [MODIFIKASI] Logika untuk mendisable tombol Simpan ---
+    const isSaveDisabled =
+        !formData.name ||
+        !formData.absen ||
+        !formData.jenisHambatan || // Wajib diisi (sesuai gambar)
+        (!!formData.email && !formData.password) || // Jika email diisi, password wajib
+        Object.values(formErrors).some((error) => !!error) // Cek jika ada error validasi
+
+    return (
+        <ModalWrapper isOpen={isOpen} onClose={onClose} {...props}>
+            <button
+                style={closeButtonStyle}
+                onClick={onClose}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}
+            >
+                <DefaultCloseIcon />
+            </button>
+            <div style={contentWrapperStyle}>
+                <div style={titleContainerStyle}>
+                    <h3 style={modalTitleStyle}>
+                        {isEditMode
+                            ? "Edit Detail Pemain"
+                            : "Tambahkan Detail Pemain"}
+                    </h3>
+                    <p style={modalDescStyle}>{modalDesc}</p>
+                </div>
+
+                <div style={formContainerStyle}>
+                    <div style={avatarContainerStyle}>
+                        <div style={avatarPreviewStyle}>
+                            {currentAvatar ? (
+                                <img
+                                    src={currentAvatar}
+                                    alt="Avatar"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ objectFit: "cover" }}
+                                />
+                            ) : (
+                                <DefaultAvatarIcon />
+                            )}
+                        </div>
+                        <ButtonLink
+                            text="Edit Avatar"
+                            onClick={onEditAvatarClick}
+                            fontFamily="Raleway"
+                            fontSize={14}
+                            fontWeight={700}
+                            color="#0066FF"
+                            hoverColor="#0052CC"
+                            textAlign="center"
+                        />
+                    </div>
+
+                    <div style={fieldsContainerStyle}>
+                        <InputField
+                            label="Nama Depan"
+                            value={formData.name || ""}
+                            onChange={(v) => handleChange("name", v)}
+                            placeholder="Masukkan nama depan"
+                            {...formProps}
+                            // --- [PERMINTAAN 4 & 5] Validasi Wajib ---
+                            isInvalid={!!formErrors.name}
+                            helpText={formErrors.name || ""}
+                            isRequired={true} // Pastikan ini wajib
+                            // ----------------------------------------
+                        />
+                        <InputField
+                            label="Nama Belakang"
+                            value={formData.lastName || ""}
+                            onChange={(v) => handleChange("lastName", v)}
+                            placeholder="Masukkan nama belakang" // <-- PERBAIKAN 3
+                            {...formProps}
+                            isRequired={false}
+                        />
+                        <InputField
+                            label="Nomor Absen"
+                            value={formData.absen || ""}
+                            onChange={(v) => handleChange("absen", v)}
+                            placeholder="Contoh: 12"
+                            {...formProps}
+                            // --- [PERMINTAAN 4] Validasi Absen ---
+                            isInvalid={!!formErrors.absen}
+                            helpText={formErrors.absen || ""}
+                            isRequired={true} // Pastikan ini wajib
+                            // -------------------------------------
+                        />
+                        <DropdownField
+                            label="Pilih Jenis Hambatan"
+                            value={formData.jenisHambatan || ""}
+                            onChange={(v) => handleChange("jenisHambatan", v)}
+                            options={jenisHambatanOptions}
+                            placeholder="Pilih dari daftar"
+                            {...formProps}
+                            isRequired={true} // <-- [MODIFIKASI] Tandai sebagai wajib
+                            isInvalid={!!formErrors.jenisHambatan} // <-- [MODIFIKASI] Tambah cek error
+                            helpText={formErrors.jenisHambatan || ""} // <-- [MODIFIKASI] Tampilkan error
+                        />
+                        <InputField
+                            label="Alamat Email"
+                            value={formData.email || ""}
+                            onChange={(v) => handleChange("email", v)}
+                            placeholder="Contoh: email@gmail.com" // <-- PERBAIKAN 3
+                            {...formProps}
+                            isRequired={false}
+                            // --- [PERMINTAAN 5] Validasi Email ---
+                            isInvalid={!!formErrors.email}
+                            helpText={formErrors.email || ""}
+                            // -------------------------------------
+                        />
+                        <PasswordField
+                            label="Password"
+                            value={formData.password || ""}
+                            onChange={(v) => handleChange("password", v)}
+                            placeholder="Masukkan password" // <-- PERBAIKAN 3
+                            {...formProps}
+                            isRequired={false}
+                        />
+                    </div>
+                </div>
+
+                <div style={modalButtonContainerStyle}>
+                    <UtilityButton
+                        text={btnCancelText}
+                        onClick={onClose}
+                        isPrimary={false}
+                        {...props}
+                    />
+                    <UtilityButton
+                        text={btnConfirmText}
+                        onClick={handleSave}
+                        isPrimary={true}
+                        isLoading={isLoading}
+                        disabled={isSaveDisabled} // <-- [MODIFIKASI] Terapkan status disabled
+                        {...props}
+                    />
+                </div>
+            </div>
+        </ModalWrapper>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: Modal Pilih Avatar
+// ========================================================================
+function SelectAvatarModal(props) {
+    const {
+        isOpen,
+        onClose,
+        onSave,
+        avatarList,
+        selectedAvatar,
+        onSelectAvatar,
+        ...modalProps
+    } = props
+
+    const { isRendered, animStyles } = useModalAnimation(isOpen)
+    const modalRef = useRef<HTMLDivElement>(null)
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (modalRef.current && e.target === modalRef.current) {
+            onClose()
+        }
+    }
+
+    if (!isRendered) return null
+
+    const modalCardStyle: React.CSSProperties = {
+        position: "relative",
+        width: "90%",
+        maxWidth: "500px", // Sedikit lebih lebar untuk grid
+        backgroundColor: "#FFFFFF",
+        borderRadius: `${modalProps.modalRadius}px`,
+        border: `${modalProps.modalBorderWidth}px solid ${modalProps.modalBorderColor}`,
+        boxShadow: modalProps.modalShadow,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        opacity: animStyles.opacity,
+        transform: animStyles.transform,
+        transition: `opacity ${modalAnimationDuration}ms ease, transform ${modalAnimationDuration}ms ease`,
+    }
+
+    const backdropStyle: React.CSSProperties = {
+        position: "fixed",
+        inset: 0,
+        backgroundColor: modalProps.backdropColor,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 101, // Di atas modal pertama
+        backdropFilter: modalProps.backdropBlur ? "blur(5px)" : "none",
+        WebkitBackdropFilter: modalProps.backdropBlur ? "blur(5px)" : "none",
+        opacity: animStyles.opacity,
+        transition: `opacity ${modalAnimationDuration}ms ease-in-out`,
+    }
+
+    const closeButtonStyle: React.CSSProperties = {
+        position: "absolute",
+        top: "16px",
+        right: "16px",
+        width: "24px",
+        height: "24px",
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        color: "#8C8C8C",
+        opacity: 0.7,
+        transition: "opacity 0.2s ease",
+        zIndex: 10,
+    }
+
+    const contentWrapperStyle: React.CSSProperties = {
+        padding: "24px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+    }
+
+    const titleStyle: React.CSSProperties = {
+        fontFamily: modalProps.modalTitleFontFamily,
+        fontWeight: modalProps.modalTitleFontWeight,
+        fontSize: modalProps.modalTitleFontSize,
+        color: modalProps.modalTitleColor,
+        lineHeight: `${modalProps.modalTitleFontSize * 1.33}px`,
+        margin: 0,
+        textAlign: "center",
+        paddingRight: "24px",
+    }
+
+    const avatarGridStyle: React.CSSProperties = {
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)", // 4 kolom
+        gap: "16px",
+        maxHeight: "300px",
+        overflowY: "auto",
+        padding: "8px",
+    }
+
+    const avatarItemStyle: React.CSSProperties = {
+        width: "100px",
+        height: "100px",
+        borderRadius: "50%",
+        overflow: "hidden",
+        cursor: "pointer",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        position: "relative",
+    }
+
+    const avatarImgStyle: React.CSSProperties = {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+    }
+
+    const checkIconStyle: React.CSSProperties = {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "40px",
+        height: "40px",
+        color: "#FFFFFF",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        borderRadius: "50%",
+        padding: "8px",
+        boxSizing: "border-box",
+    }
+
+    const modalButtonContainerStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "24px",
+        marginTop: "16px",
+    }
+
+    return (
+        <div style={backdropStyle} ref={modalRef} onClick={handleBackdropClick}>
+            <div style={modalCardStyle}>
+                <button
+                    style={closeButtonStyle}
+                    onClick={onClose}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                    onMouseLeave={(e) =>
+                        (e.currentTarget.style.opacity = "0.7")
+                    }
+                >
+                    <DefaultCloseIcon />
+                </button>
+                <div style={contentWrapperStyle}>
+                    <h3 style={titleStyle}>Pilih Avatar</h3>
+                    <div style={avatarGridStyle}>
+                        {avatarList.map((avatar) => (
+                            <div
+                                key={avatar.id}
+                                style={{
+                                    ...avatarItemStyle,
+                                    transform:
+                                        selectedAvatar?.id === avatar.id
+                                            ? "scale(1.05)"
+                                            : "scale(1)",
+                                    boxShadow:
+                                        selectedAvatar?.id === avatar.id
+                                            ? `0 0 0 4px ${modalProps.modalBorderColor}`
+                                            : "none",
+                                }}
+                                onClick={() => onSelectAvatar(avatar)}
+                            >
+                                <img
+                                    src={avatar.url}
+                                    alt={`Avatar ${avatar.id}`}
+                                    style={avatarImgStyle}
+                                />
+                                {selectedAvatar?.id === avatar.id && (
+                                    <div style={checkIconStyle}>
+                                        <DefaultCheckIcon />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    <div style={modalButtonContainerStyle}>
+                        <UtilityButton
+                            text="Batal"
+                            onClick={onClose}
+                            isPrimary={false}
+                            {...props}
+                        />
+                        <UtilityButton
+                            text="Simpan"
+                            onClick={onSave}
+                            isPrimary={true}
+                            {...props}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ========================================================================
+//  KOMPONEN INTERNAL: Modal Konfirmasi Hapus
+// ========================================================================
+function DeleteConfirmationModal(props) {
+    const {
+        isOpen,
+        onClose,
+        onConfirm,
+        isLoading,
+        backdropColor,
+        backdropBlur,
+        modalRadius,
+        modalBorderWidth,
+        modalBorderColor,
+        modalShadow,
+        btnConfirmText,
+        btnCancelText,
+        btnHoverScale,
+        btnPressedScale,
+        btnTransitionDuration,
+        btnTransitionBounce,
+    } = props
+
+    const { isRendered, animStyles } = useModalAnimation(isOpen)
+    const modalRef = useRef<HTMLDivElement>(null)
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (modalRef.current && e.target === modalRef.current && !isLoading) {
+            onClose()
+        }
+    }
+
+    if (!isRendered) return null
+
+    const backdropStyle: React.CSSProperties = {
+        position: "fixed",
+        inset: 0,
+        backgroundColor: backdropColor,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 102, // Di atas modal lain
+        backdropFilter: backdropBlur ? "blur(5px)" : "none",
+        WebkitBackdropFilter: backdropBlur ? "blur(5px)" : "none",
+        opacity: animStyles.opacity,
+        transition: `opacity ${modalAnimationDuration}ms ease-in-out`,
+    }
+
+    const modalCardStyle: React.CSSProperties = {
+        position: "relative",
+        width: "90%",
+        maxWidth: "400px",
+        backgroundColor: "#FFFFFF",
+        borderRadius: `${modalRadius}px`,
+        border: `${modalBorderWidth}px solid ${modalBorderColor}`,
+        boxShadow: modalShadow,
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        padding: "24px",
+        opacity: animStyles.opacity,
+        transform: animStyles.transform,
+        transition: `opacity ${modalAnimationDuration}ms ease, transform ${modalAnimationDuration}ms ease`,
+    }
+
+    const titleStyle: React.CSSProperties = {
+        fontFamily: "Raleway",
+        fontWeight: 700,
+        fontSize: "18px",
+        color: "#262626",
+        margin: 0,
+        textAlign: "center",
+    }
+
+    const messageStyle: React.CSSProperties = {
+        fontFamily: "Raleway",
+        fontWeight: 400,
+        fontSize: "14px",
+        color: "#595959",
+        margin: 0,
+        textAlign: "center",
+        lineHeight: 1.5,
+    }
+
+    const buttonContainerStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "12px",
+        marginTop: "24px",
+    }
+
+    return (
+        <div style={backdropStyle} ref={modalRef} onClick={handleBackdropClick}>
+            <div style={modalCardStyle}>
+                <h3 style={titleStyle}>Apakah Kamu Yakin?</h3>
+                <p style={messageStyle}>
+                    Tindakan ini tidak dapat dibatalkan. Pemain akan dihapus
+                    secara permanen.
+                </p>
+                <div style={buttonContainerStyle}>
+                    <UtilityButton
+                        text={btnCancelText}
+                        onClick={onClose}
+                        isPrimary={false}
+                        isLoading={isLoading}
+                        {...props}
+                    />
+                    <UtilityButton
+                        text={btnConfirmText}
+                        onClick={onConfirm}
+                        isPrimary={true}
+                        isLoading={isLoading}
+                        {...props}
+                    />
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ========================================================================
+//  [FIX] KOMPONEN TOAST NOTIFICATION YANG HILANG
+// ========================================================================
+function ToastNotification(props) {
+    const {
+        isOpen,
+        onClose,
+        title,
+        message,
+        bgColor,
+        borderColor,
+        iconColor,
+        titleColor,
+        messageColor,
+    } = props
+
+    const [isRendered, setIsRendered] = useState(false)
+    const [animStyles, setAnimStyles] = useState({
+        opacity: 0,
+        transform: "translateY(20px)",
+    })
+
+    useEffect(() => {
+        let closeTimer: NodeJS.Timeout
+        if (isOpen) {
+            setIsRendered(true)
+            setTimeout(() => {
+                setAnimStyles({ opacity: 1, transform: "translateY(0)" })
+            }, 10)
+
+            // Auto close after 3 seconds
+            closeTimer = setTimeout(() => {
+                handleClose()
+            }, 3000)
+        }
+
+        return () => {
+            if (closeTimer) {
+                clearTimeout(closeTimer)
+            }
+        }
+    }, [isOpen])
+
+    const handleClose = () => {
+        setAnimStyles({ opacity: 0, transform: "translateY(20px)" })
+        setTimeout(() => {
+            setIsRendered(false)
+            onClose()
+        }, 300)
+    }
+
+    if (!isRendered) return null
+
+    const toastWrapperStyle: React.CSSProperties = {
+        position: "fixed",
+        bottom: "24px",
+        right: "24px",
+        width: "350px",
+        backgroundColor: bgColor || "#EEFFEE",
+        borderRadius: "8px",
+        border: `1px solid ${borderColor || "#09DE1B"}`,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "12px",
+        padding: "16px",
+        zIndex: 200,
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+        ...animStyles,
+    }
+    const iconStyle: React.CSSProperties = {
+        width: "24px",
+        height: "24px",
+        color: iconColor || "#09DE1B",
+        flexShrink: 0,
+        marginTop: "2px",
+    }
+    const textContainerStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        gap: "4px",
+        flexGrow: 1,
+    }
+    const titleStyle: React.CSSProperties = {
+        fontFamily: "Raleway, sans-serif",
+        fontWeight: 700,
+        fontSize: "16px",
+        color: titleColor || "#09DE1B",
+        margin: 0,
+    }
+    const messageStyle: React.CSSProperties = {
+        fontFamily: "Raleway, sans-serif",
+        fontWeight: 500,
+        fontSize: "14px",
+        color: messageColor || "#2D3748",
+        margin: 0,
+        lineHeight: 1.4,
+    }
+    const closeButtonStyle: React.CSSProperties = {
+        width: "20px",
+        height: "20px",
+        color: "#8C8C8C",
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        opacity: 0.7,
+    }
+
+    return (
+        <div style={toastWrapperStyle}>
+            <div style={iconStyle}>
+                <DefaultCheckIcon />
+            </div>
+            <div style={textContainerStyle}>
+                <h4 style={titleStyle}>{title}</h4>
+                <p style={messageStyle}>{message}</p>
+            </div>
+            <button
+                style={closeButtonStyle}
+                onClick={handleClose}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}
+            >
+                <DefaultCloseIcon />
+            </button>
+        </div>
+    )
+}
+
+// ========================================================================
+//  [FIX] KOMPONEN CONFETTI CONTAINER YANG HILANG (Placeholder)
+// ========================================================================
+// Placeholder untuk Confetti. Implementasi penuh memerlukan library
+// atau animasi CSS yang kompleks.
+function ConfettiContainer() {
+    // Ini hanya placeholder, tidak akan menampilkan apa-apa.
+    // Untuk confetti sungguhan, pertimbangkan library seperti 'react-confetti'
+    // jika lingkungan Framer Anda mengizinkan.
+    return null
+}
+
+// ========================================================================
+//  KOMPONEN UTAMA: SectionAddPlayer
+// ========================================================================
+export default function SectionAddPlayer(props) {
+    const {
+        // Search Bar
+        searchPlaceholder,
+        searchFontFamily,
+        searchFontWeight,
+        searchFontSize,
+        searchFontColor,
+        searchPlaceholderColor,
+        searchDefaultFill,
+        searchDefaultBorderColor,
+        searchDefaultBorderWidth,
+        searchFocusFill,
+        searchFocusBorderColor,
+        searchIcon,
+        searchClearIcon,
+        searchIconColor,
+        searchIconFocusColor,
+
+        // Tombol Tambah
+        btnAddText,
+        btnAddIcon,
+        btnAddIconColor,
+        btnAddFontFamily,
+        btnAddFontWeight,
+        btnAddFontSize,
+        btnAddLineHeight,
+        btnAddFontColor,
+        btnAddBgColor,
+        btnAddRadius,
+        btnAddBorderWidth,
+        btnAddBorderColor,
+        btnAddShadow1,
+        btnAddShadow2,
+
+        // Interaksi
+        btnHoverScale,
+        btnPressedScale,
+        btnTransitionDuration,
+        btnTransitionBounce,
+
+        // Modal Umum
+        backdropColor,
+        backdropBlur,
+        modalRadius,
+        modalBorderWidth,
+        modalBorderColor,
+        modalShadow,
+
+        // Modal Tambah/Edit
+        modalTitle,
+        modalDesc,
+        modalTitleFontFamily,
+        modalTitleFontWeight,
+        modalTitleFontSize,
+        modalTitleColor,
+        modalDescFontFamily,
+        modalDescFontWeight,
+        modalDescFontSize,
+        modalDescColor,
+
+        // Input Form
+        inputFontFamily,
+        inputFontWeight,
+        inputFontSize,
+        inputFontColor,
+        inputPlaceholderColor,
+        inputDefaultFill,
+        inputDefaultBorderColor,
+        inputDefaultBorderWidth,
+        inputFocusFill,
+        inputFocusBorderColor,
+        inputInvalidFill,
+        inputInvalidBorderColor,
+        inputLabelFontFamily,
+        inputLabelFontWeight,
+        inputLabelFontSize,
+        inputLabelLetterSpacing,
+        inputLabelLineHeight,
+        inputLabelTextColor,
+        inputLabelAsteriskColor,
+
+        // Tombol Modal
+        btnConfirmText,
+        btnCancelText,
+
+        // Avatar Modal
+        avatarList,
+
+        // --- [PERMINTAAN 6] Ambil data pemain dari panel ---
+        table_p1_name,
+        table_p1_absen,
+        table_p1_avatarUrl,
+        table_p1_hambatan,
+        table_p1_email,
+        table_p1_password,
+        table_p2_name,
+        table_p2_absen,
+        table_p2_avatarUrl,
+        table_p2_hambatan,
+        table_p2_email,
+        table_p2_password,
+        table_p3_name,
+        table_p3_absen,
+        table_p3_avatarUrl,
+        table_p3_hambatan,
+        table_p3_email,
+        table_p3_password,
+        table_p4_name,
+        table_p4_absen,
+        table_p4_avatarUrl,
+        table_p4_hambatan,
+        table_p4_email,
+        table_p4_password,
+        table_p5_name,
+        table_p5_absen,
+        table_p5_avatarUrl,
+        table_p5_hambatan,
+        table_p5_email,
+        table_p5_password,
+        // --------------------------------------------------
+
+        // Toast
+        showConfetti,
+        toastAddTitle,
+        toastAddDesc,
+        toastEditTitle,
+        toastEditDesc,
+        toastDeleteTitle,
+        toastDeleteDesc,
+        toastColor,
+        toastIconColor,
+        toastBorderColor,
+        toastTitleColor,
+        toastMessageColor,
+    } = props
+
+    const [searchTerm, setSearchTerm] = useState("")
+
+    // --- [PERMINTAAN 6] Konstruksi data pemain dari props panel ---
+    const players = useMemo(() => {
+        const constructedPlayerList = [
+            {
+                id: 1,
+                name: table_p1_name,
+                absen: table_p1_absen,
+                avatarUrl: table_p1_avatarUrl,
+                jenisHambatan: table_p1_hambatan,
+                email: table_p1_email,
+                password: table_p1_password,
+            },
+            {
+                id: 2,
+                name: table_p2_name,
+                absen: table_p2_absen,
+                avatarUrl: table_p2_avatarUrl,
+                jenisHambatan: table_p2_hambatan,
+                email: table_p2_email,
+                password: table_p2_password,
+            },
+            {
+                id: 3,
+                name: table_p3_name,
+                absen: table_p3_absen,
+                avatarUrl: table_p3_avatarUrl,
+                jenisHambatan: table_p3_hambatan,
+                email: table_p3_email,
+                password: table_p3_password,
+            },
+            {
+                id: 4,
+                name: table_p4_name,
+                absen: table_p4_absen,
+                avatarUrl: table_p4_avatarUrl,
+                jenisHambatan: table_p4_hambatan,
+                email: table_p4_email,
+                password: table_p4_password,
+            },
+            {
+                id: 5,
+                name: table_p5_name,
+                absen: table_p5_absen,
+                avatarUrl: table_p5_avatarUrl,
+                jenisHambatan: table_p5_hambatan,
+                email: table_p5_email,
+                password: table_p5_password,
+            },
+        ].filter((p) => p.name && p.absen) // Hanya tampilkan jika nama & absen ada
+
+        // Jika tidak ada data dari panel, gunakan default
+        if (constructedPlayerList.length === 0) {
+            return defaultPlayerList
+        }
+        return constructedPlayerList
+    }, [
+        table_p1_name,
+        table_p1_absen,
+        table_p1_avatarUrl,
+        table_p1_hambatan,
+        table_p1_email,
+        table_p1_password,
+        table_p2_name,
+        table_p2_absen,
+        table_p2_avatarUrl,
+        table_p2_hambatan,
+        table_p2_email,
+        table_p2_password,
+        table_p3_name,
+        table_p3_absen,
+        table_p3_avatarUrl,
+        table_p3_hambatan,
+        table_p3_email,
+        table_p3_password,
+        table_p4_name,
+        table_p4_absen,
+        table_p4_avatarUrl,
+        table_p4_hambatan,
+        table_p4_email,
+        table_p4_password,
+        table_p5_name,
+        table_p5_absen,
+        table_p5_avatarUrl,
+        table_p5_hambatan,
+        table_p5_email,
+        table_p5_password,
+    ])
+    // -------------------------------------------------------------
+
+    // --- [PERMINTAAN 7] Proses avatarList dari panel ---
+    const processedAvatarList = useMemo(() => {
+        if (avatarList && avatarList.length > 0) {
+            // avatarList dari props adalah string[]
+            return avatarList.map((url, index) => ({
+                id: index + 1,
+                url:
+                    url ||
+                    `https://placehold.co/100x100/CCCCCC/FFFFFF?text=A${index + 1}`, // Fallback jika URL kosong
+            }))
+        }
+        return defaultAvatarList // Fallback ke default jika panel kosong
+    }, [avatarList])
+    // -------------------------------------------------
+
+    const [playerData, setPlayerData] = useState<Player[]>(players)
+
+    // --- [PERMINTAAN 6] Update state jika props dari panel berubah ---
+    useEffect(() => {
+        setPlayerData(players)
+    }, [players])
+    // ---------------------------------------------------------------
+
+    // State Modal
+    const [modalMode, setModalMode] = useState<
+        "add" | "edit" | "delete" | "avatar" | null
+    >(null)
+    const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
+    const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null)
+    const [tempAvatar, setTempAvatar] = useState<string | undefined>(undefined) // Untuk avatar di modal tambah/edit
+
+    // State Toast & Loading
+    const [isLoading, setIsLoading] = useState(false)
+    const [toastInfo, setToastInfo] = useState({
+        show: false,
+        title: "",
+        message: "",
+    })
+
+    // Logika filter tabel
+    const filteredTablePlayers = playerData.filter(
+        (p) =>
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.absen.toString().includes(searchTerm) ||
+            p.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    // --- HANDLERS ---
+
+    const handleOpenAddModal = () => {
+        setSelectedPlayer(null) // Pastikan tidak ada data
+        setTempAvatar(undefined) // Reset avatar
+        setModalMode("add")
+    }
+
+    const handleOpenEditModal = (player: Player) => {
+        setSelectedPlayer(player)
+        setTempAvatar(player.avatarUrl) // Set avatar yg ada
+        setModalMode("edit")
+    }
+
+    const handleOpenDeleteModal = (player: Player) => {
+        setSelectedPlayer(player)
+        setModalMode("delete")
+    }
+
+    const handleOpenAvatarModal = () => {
+        // --- [PERMINTAAN 7] Gunakan processedAvatarList untuk mencari ---
+        const current = processedAvatarList.find((a) => a.url === tempAvatar)
+        // --------------------------------------------------------------
+        setSelectedAvatar(current || null)
+        setModalMode("avatar")
+    }
+
+    const handleCloseModals = () => {
+        setModalMode(null)
+    }
+
+    // Menyimpan avatar dari Modal Avatar ke Modal Edit/Tambah
+    const handleSaveAvatar = () => {
+        setTempAvatar(selectedAvatar?.url)
+        setModalMode(selectedPlayer ? "edit" : "add") // Kembali ke modal sebelumnya
+    }
+
+    // Menyimpan dari Modal Tambah/Edit
+    const handleSavePlayer = (formData: Player) => {
+        const toastTitle = modalMode === "add" ? toastAddTitle : toastEditTitle
+        const toastMessage = modalMode === "add" ? toastAddDesc : toastEditDesc
+
+        // Logika simpan (di sini kita hanya update state)
+        if (modalMode === "add") {
+            const newPlayer = {
+                ...formData,
+                id: Date.now(),
+                avatarUrl: tempAvatar,
+            } // ID unik baru
+            setPlayerData((prev) => [newPlayer, ...prev])
+        } else {
+            setPlayerData((prev) =>
+                prev.map((p) =>
+                    p.id === selectedPlayer.id
+                        ? { ...p, ...formData, avatarUrl: tempAvatar }
+                        : p
+                )
+            )
+        }
+
+        handleCloseModals()
+        setToastInfo({ show: true, title: toastTitle, message: toastMessage })
+    }
+
+    // Konfirmasi Hapus
+    const handleDeletePlayer = () => {
+        setIsLoading(true)
+        setTimeout(() => {
+            setPlayerData((prev) =>
+                prev.filter((p) => p.id !== selectedPlayer.id)
+            )
+            setIsLoading(false)
+            handleCloseModals()
+            setToastInfo({
+                show: true,
+                title: toastDeleteTitle,
+                message: toastDeleteDesc,
+            })
+        }, 1000)
+    }
+
+    // --- STYLING ---
+    const mainWrapperStyle: React.CSSProperties = {
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px", // Jarak antara bar atas dan tabel
+    }
+
+    const topBarContainerStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "16px",
+        alignItems: "center",
+    }
+
+    const searchBarWrapperStyle: React.CSSProperties = {
+        flexGrow: 1, // Mengisi ruang
+    }
+
+    return (
+        <>
+            <div style={mainWrapperStyle}>
+                <div style={topBarContainerStyle}>
+                    <div style={searchBarWrapperStyle}>
+                        <InternalSearchBar
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            placeholder={searchPlaceholder}
+                            fontFamily={searchFontFamily}
+                            fontWeight={searchFontWeight}
+                            fontSize={searchFontSize}
+                            fontColor={searchFontColor}
+                            placeholderColor={searchPlaceholderColor}
+                            defaultFill={searchDefaultFill}
+                            defaultBorderColor={searchDefaultBorderColor}
+                            defaultBorderWidth={searchDefaultBorderWidth}
+                            focusFill={searchFocusFill}
+                            focusBorderColor={searchFocusBorderColor}
+                            searchIcon={searchIcon}
+                            clearIcon={searchClearIcon}
+                            iconColor={searchIconColor}
+                            iconFocusColor={searchIconFocusColor}
+                        />
+                    </div>
+                    <AddPlayerButton
+                        text={btnAddText}
+                        icon={btnAddIcon}
+                        iconColor={btnAddIconColor}
+                        fontFamily={btnAddFontFamily}
+                        fontWeight={btnAddFontWeight}
+                        fontSize={btnAddFontSize}
+                        lineHeight={btnAddLineHeight}
+                        fontColor={btnAddFontColor}
+                        bgColor={btnAddBgColor}
+                        radius={btnAddRadius}
+                        borderWidth={btnAddBorderWidth}
+                        borderColor={btnAddBorderColor}
+                        shadow1={btnAddShadow1}
+                        shadow2={btnAddShadow2}
+                        hoverScale={btnHoverScale}
+                        pressedScale={btnPressedScale}
+                        transitionDuration={btnTransitionDuration}
+                        transitionBounce={btnTransitionBounce}
+                        onClick={handleOpenAddModal}
+                    />
+                </div>
+
+                <PlayerTable
+                    players={filteredTablePlayers}
+                    onEdit={handleOpenEditModal}
+                    onDelete={handleOpenDeleteModal}
+                />
+            </div>
+
+            {/* --- MODAL-MODAL --- */}
+
+            {/* Modal Tambah / Edit Pemain */}
+            <AddEditPlayerModal
+                isOpen={modalMode === "add" || modalMode === "edit"}
+                onClose={handleCloseModals}
+                onSave={handleSavePlayer}
+                isEditMode={modalMode === "edit"}
+                initialData={selectedPlayer}
+                currentAvatar={tempAvatar}
+                onEditAvatarClick={handleOpenAvatarModal}
+                // Styling
+                backdropColor={backdropColor}
+                backdropBlur={backdropBlur}
+                modalRadius={modalRadius}
+                modalBorderWidth={modalBorderWidth}
+                modalBorderColor={modalBorderColor}
+                modalShadow={modalShadow}
+                modalTitle={modalTitle}
+                modalDesc={modalDesc}
+                modalTitleFontFamily={modalTitleFontFamily}
+                modalTitleFontWeight={modalTitleFontWeight}
+                modalTitleFontSize={modalTitleFontSize}
+                modalTitleColor={modalTitleColor}
+                modalDescFontFamily={modalDescFontFamily}
+                modalDescFontWeight={modalDescFontWeight}
+                modalDescFontSize={modalDescFontSize}
+                modalDescColor={modalDescColor}
+                // Tombol
+                btnConfirmText={btnConfirmText}
+                btnCancelText={btnCancelText}
+                btnHoverScale={btnHoverScale}
+                btnPressedScale={btnPressedScale}
+                btnTransitionDuration={btnTransitionDuration}
+                btnTransitionBounce={btnTransitionBounce}
+                // Props Form
+                fontFamily={inputFontFamily}
+                fontWeight={inputFontWeight}
+                fontSize={inputFontSize}
+                fontColor={inputFontColor}
+                placeholderColor={inputPlaceholderColor}
+                defaultFill={inputDefaultFill}
+                defaultBorderColor={inputDefaultBorderColor}
+                defaultBorderWidth={inputDefaultBorderWidth}
+                focusFill={inputFocusFill}
+                focusBorderColor={inputFocusBorderColor}
+                invalidFill={inputInvalidFill}
+                invalidBorderColor={inputInvalidBorderColor}
+                labelFontFamily={inputLabelFontFamily}
+                labelFontWeight={inputLabelFontWeight}
+                labelFontSize={inputLabelFontSize}
+                labelLetterSpacing={inputLabelLetterSpacing}
+                labelLineHeight={inputLabelLineHeight}
+                labelTextColor={inputLabelTextColor}
+                labelAsteriskColor={inputLabelAsteriskColor}
+            />
+
+            {/* Modal Pilih Avatar */}
+            <SelectAvatarModal
+                isOpen={modalMode === "avatar"}
+                onClose={() => setModalMode(selectedPlayer ? "edit" : "add")} // Kembali ke modal sblmnya
+                onSave={handleSaveAvatar}
+                // --- [PERMINTAAN 7] Gunakan processedAvatarList ---
+                avatarList={processedAvatarList}
+                // ----------------------------------------------
+                selectedAvatar={selectedAvatar}
+                onSelectAvatar={setSelectedAvatar}
+                // Styling
+                backdropColor={backdropColor}
+                backdropBlur={backdropBlur}
+                modalRadius={modalRadius}
+                modalBorderWidth={modalBorderWidth}
+                modalBorderColor={modalBorderColor}
+                modalShadow={modalShadow}
+                // Tombol
+                btnHoverScale={btnHoverScale}
+                btnPressedScale={btnPressedScale}
+                btnTransitionDuration={btnTransitionDuration}
+                btnTransitionBounce={btnTransitionBounce}
+            />
+
+            {/* Modal Konfirmasi Hapus */}
+            <DeleteConfirmationModal
+                isOpen={modalMode === "delete"}
+                onClose={handleCloseModals}
+                onConfirm={handleDeletePlayer}
+                isLoading={isLoading}
+                // Styling
+                backdropColor={backdropColor}
+                backdropBlur={backdropBlur}
+                modalRadius={modalRadius}
+                modalBorderWidth={modalBorderWidth}
+                modalBorderColor={modalBorderColor}
+                modalShadow={modalShadow}
+                // Tombol
+                btnConfirmText="Hapus"
+                btnCancelText="Batal"
+                btnHoverScale={btnHoverScale}
+                btnPressedScale={btnPressedScale}
+                btnTransitionDuration={btnTransitionDuration}
+                btnTransitionBounce={btnTransitionBounce}
+            />
+
+            {/* Toast Notifikasi */}
+            {/* [FIX] Mengganti showToast menjadi toastInfo.show */}
+            {toastInfo.show && props.showConfetti && <ConfettiContainer />}
+            <ToastNotification
+                isOpen={toastInfo.show}
+                onClose={() => setToastInfo({ ...toastInfo, show: false })}
+                title={toastInfo.title}
+                message={toastInfo.message}
+                bgColor={toastColor}
+                borderColor={toastBorderColor}
+                iconColor={toastIconColor}
+                titleColor={toastTitleColor}
+                messageColor={toastMessageColor}
+                H
+            />
+        </>
+    )
+}
+
+// ========================================================================
+//  KONTROL PROPERTI (PANEL KANAN)
+// ========================================================================
+addPropertyControls(SectionAddPlayer, {
+    // --- Search Bar ---
+    searchPlaceholder: {
+        title: "Placeholder Search",
+        type: ControlType.String,
+        defaultValue: "Cari nama, no absen, atau email...",
+        category: "Search Bar",
+    },
+    searchFontFamily: {
+        title: "Font",
+        type: ControlType.String,
+        defaultValue: "Raleway",
+        category: "Search Bar",
+    },
+    searchFontWeight: {
+        title: "Weight",
+        type: ControlType.Enum,
+        options: [400, 500, 600, 700],
+        optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
+        defaultValue: 400,
+        category: "Search Bar",
+    },
+    searchFontSize: {
+        title: "Size",
+        type: ControlType.Number,
+        defaultValue: 16,
+        unit: "px",
+        category: "Search Bar",
+    },
+    searchFontColor: {
+        title: "Warna Font",
+        type: ControlType.Color,
+        defaultValue: "#262626",
+        category: "Search Bar",
+    },
+    searchPlaceholderColor: {
+        title: "Warna Placeholder",
+        type: ControlType.Color,
+        defaultValue: "#BFBFBF",
+        category: "Search Bar",
+    },
+    searchDefaultFill: {
+        title: "Fill",
+        type: ControlType.Color,
+        defaultValue: "#FFFFFF",
+        category: "Search Bar",
+    },
+    searchDefaultBorderColor: {
+        title: "Border Color",
+        type: ControlType.Color,
+        defaultValue: "#BFBFBF",
+        category: "Search Bar",
+    },
+    searchDefaultBorderWidth: {
+        title: "Border Width",
+        type: ControlType.Number,
+        defaultValue: 1,
+        unit: "px",
+        min: 0,
+        category: "Search Bar",
+    },
+    searchFocusFill: {
+        title: "Fill (Focus)",
+        type: ControlType.Color,
+        defaultValue: "#EDF8FF",
+        category: "Search Bar",
+    },
+    searchFocusBorderColor: {
+        title: "Border (Focus)",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Search Bar",
+    },
+    searchIcon: {
+        title: "Ikon Search",
+        type: ControlType.Image,
+        category: "Search Bar",
+    },
+    searchClearIcon: {
+        title: "Ikon Clear",
+        type: ControlType.Image,
+        category: "Search Bar",
+    },
+    searchIconColor: {
+        title: "Warna Ikon",
+        type: ControlType.Color,
+        defaultValue: "#BFBFBF",
+        category: "Search Bar",
+    },
+    searchIconFocusColor: {
+        title: "Warna Ikon (Focus)",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Search Bar",
+    },
+
+    // --- Tombol Tambah Pemain ---
+    btnAddText: {
+        title: "Teks Tombol",
+        type: ControlType.String,
+        defaultValue: "Tambahkan Pemain",
+        category: "Tombol Tambah",
+    },
+    btnAddIcon: {
+        title: "Ikon Tombol",
+        type: ControlType.Image,
+        category: "Tombol Tambah",
+    },
+    btnAddIconColor: {
+        title: "Warna Ikon",
+        type: ControlType.Color,
+        defaultValue: "#FFFFFF",
+        category: "Tombol Tambah",
+    },
+    btnAddFontFamily: {
+        title: "Font Family",
+        type: ControlType.String,
+        defaultValue: "Raleway",
+        category: "Tombol Tambah",
+    },
+    btnAddFontWeight: {
+        title: "Font Weight",
+        type: ControlType.Enum,
+        options: [400, 500, 600, 700],
+        optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
+        defaultValue: 700,
+        category: "Tombol Tambah",
+    },
+    btnAddFontSize: {
+        title: "Font Size",
+        type: ControlType.Number,
+        defaultValue: 14,
+        unit: "px",
+        category: "Tombol Tambah",
+    },
+    btnAddLineHeight: {
+        title: "Line Height",
+        type: ControlType.Number,
+        defaultValue: 16,
+        unit: "px",
+        category: "Tombol Tambah",
+    },
+    btnAddFontColor: {
+        title: "Font Color",
+        type: ControlType.Color,
+        defaultValue: "#FFFFFF",
+        category: "Tombol Tambah",
+    },
+    btnAddBgColor: {
+        title: "Fill",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Tombol Tambah",
+    },
+    btnAddBorderWidth: {
+        title: "Border Width",
+        type: ControlType.Number,
+        defaultValue: 1,
+        unit: "px",
+        min: 0,
+        category: "Tombol Tambah",
+    },
+    btnAddBorderColor: {
+        title: "Border Color",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Tombol Tambah",
+    },
+    btnAddRadius: {
+        title: "Radius",
+        type: ControlType.Number,
+        defaultValue: 8,
+        unit: "px",
+        min: 0,
+        category: "Tombol Tambah",
+    },
+    btnAddShadow1: {
+        title: "Shadow 1",
+        type: ControlType.String,
+        defaultValue: "inset 0px 8px 16px 0px #FFFFFF29",
+        category: "Tombol Tambah",
+    },
+    btnAddShadow2: {
+        title: "Shadow 2",
+        type: ControlType.String,
+        defaultValue: "inset 0px 2px 0px 0px #FFFFFF1A",
+        category: "Tombol Tambah",
+    },
+
+    // --- Interaksi Tombol (Global) ---
+    btnHoverScale: {
+        title: "Hover Scale",
+        type: ControlType.Number,
+        defaultValue: 1.05,
+        step: 0.005,
+        category: "Interaksi Tombol",
+    },
+    btnPressedScale: {
+        title: "Pressed Scale",
+        type: ControlType.Number,
+        defaultValue: 0.95,
+        step: 0.005,
+        category: "Interaksi Tombol",
+    },
+    btnTransitionDuration: {
+        title: "Durasi (detik)",
+        type: ControlType.Number,
+        defaultValue: 0.45,
+        unit: "s",
+        step: 0.05,
+        min: 0,
+        category: "Interaksi Tombol",
+    },
+    btnTransitionBounce: {
+        title: "Bounce",
+        type: ControlType.Number,
+        defaultValue: 0.25,
+        step: 0.05,
+        min: 0,
+        max: 1,
+        category: "Interaksi Tombol",
+    },
+
+    // --- Styling Modal ---
+    backdropColor: {
+        title: "Warna Backdrop",
+        type: ControlType.Color,
+        defaultValue: "rgba(0, 0, 0, 0.4)",
+        category: "Styling Modal",
+    },
+    backdropBlur: {
+        title: "Backdrop Blur",
+        type: ControlType.Boolean,
+        defaultValue: false,
+        category: "Styling Modal",
+    },
+    modalRadius: {
+        title: "Radius Modal",
+        type: ControlType.Number,
+        defaultValue: 16,
+        unit: "px",
+        min: 0,
+        category: "Styling Modal",
+    },
+    modalBorderWidth: {
+        title: "Border Width Modal",
+        type: ControlType.Number,
+        defaultValue: 1,
+        unit: "px",
+        min: 0,
+        category: "Styling Modal",
+    },
+    modalBorderColor: {
+        title: "Border Color Modal",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Styling Modal",
+    },
+    modalShadow: {
+        title: "Shadow Modal",
+        type: ControlType.String,
+        defaultValue: "8px 8px 0px 0px #084EC5",
+        category: "Styling Modal",
+    },
+
+    // --- Konten Teks Modal ---
+    modalTitle: {
+        title: "Judul Modal",
+        type: ControlType.String,
+        defaultValue: "Tambahkan Detail Pemain",
+        category: "Konten Modal",
+    },
+    modalTitleFontFamily: {
+        title: "Font Judul",
+        type: ControlType.String,
+        defaultValue: "Raleway",
+        category: "Konten Modal",
+    },
+    modalTitleFontWeight: {
+        title: "Weight Judul",
+        type: ControlType.Enum,
+        options: [400, 500, 600, 700],
+        optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
+        defaultValue: 700,
+        category: "Konten Modal",
+    },
+    modalTitleFontSize: {
+        title: "Size Judul",
+        type: ControlType.Number,
+        defaultValue: 24,
+        unit: "px",
+        category: "Konten Modal",
+    },
+    modalTitleColor: {
+        title: "Warna Judul",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Konten Modal",
+    },
+    modalDesc: {
+        title: "Deskripsi Modal",
+        type: ControlType.String,
+        defaultValue: "Isi detail pemain baru di bawah ini.",
+        category: "Konten Modal",
+    },
+    modalDescFontFamily: {
+        title: "Font Deskripsi",
+        type: ControlType.String,
+        defaultValue: "Raleway",
+        category: "Konten Modal",
+    },
+    modalDescFontWeight: {
+        title: "Weight Deskripsi",
+        type: ControlType.Enum,
+        options: [400, 500, 600, 700],
+        optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
+        defaultValue: 500,
+        category: "Konten Modal",
+    },
+    modalDescFontSize: {
+        title: "Size Deskripsi",
+        type: ControlType.Number,
+        defaultValue: 14,
+        unit: "px",
+        category: "Konten Modal",
+    },
+    modalDescColor: {
+        title: "Warna Deskripsi",
+        type: ControlType.Color,
+        defaultValue: "#262626",
+        category: "Konten Modal",
+    },
+    btnConfirmText: {
+        title: "Teks Konfirmasi",
+        type: ControlType.String,
+        defaultValue: "Simpan",
+        category: "Konten Modal",
+    },
+    btnCancelText: {
+        title: "Teks Batal",
+        type: ControlType.String,
+        defaultValue: "Batal",
+        category: "Konten Modal",
+    },
+
+    // --- Styling Input Form Modal ---
+    inputLabelFontFamily: {
+        title: "Label Font",
+        type: ControlType.String,
+        defaultValue: "Raleway",
+        category: "Styling Input Form",
+    },
+    inputLabelFontWeight: {
+        title: "Label Weight",
+        type: ControlType.Enum,
+        options: [400, 500, 600, 700],
+        optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
+        defaultValue: 700,
+        category: "Styling Input Form",
+    },
+    inputLabelFontSize: {
+        title: "Label Size",
+        type: ControlType.Number,
+        defaultValue: 14,
+        unit: "px",
+        category: "Styling Input Form",
+    },
+    inputLabelLetterSpacing: {
+        title: "Label Spacing",
+        type: ControlType.Number,
+        defaultValue: 0.4,
+        unit: "px",
+        category: "Styling Input Form",
+    },
+    inputLabelLineHeight: {
+        title: "Label Line Height",
+        type: ControlType.Number,
+        defaultValue: 20,
+        unit: "px",
+        category: "Styling Input Form",
+    },
+    inputLabelTextColor: {
+        title: "Label Color",
+        type: ControlType.Color,
+        defaultValue: "#262626",
+        category: "Styling Input Form",
+    },
+    inputLabelAsteriskColor: {
+        title: "Label Asterisk (*)",
+        type: ControlType.Color,
+        defaultValue: "#E82D2F",
+        category: "Styling Input Form",
+    },
+    inputFontFamily: {
+        title: "Input Font",
+        type: ControlType.String,
+        defaultValue: "Raleway",
+        category: "Styling Input Form",
+    },
+    inputFontWeight: {
+        title: "Input Weight",
+        type: ControlType.Enum,
+        options: [400, 500, 600, 700],
+        optionTitles: ["Regular", "Medium", "SemiBold", "Bold"],
+        // --- PERBAIKAN 1: Font Weight Medium ---
+        defaultValue: 500,
+        // -------------------------------------
+        category: "Styling Input Form",
+    },
+    inputFontSize: {
+        title: "Input Size",
+        type: ControlType.Number,
+        defaultValue: 16,
+        unit: "px",
+        category: "Styling Input Form",
+    },
+    inputFontColor: {
+        title: "Input Font Color",
+        type: ControlType.Color,
+        defaultValue: "#262626",
+        category: "Styling Input Form",
+    },
+    inputPlaceholderColor: {
+        title: "Input Placeholder",
+        type: ControlType.Color,
+        defaultValue: "#BFBFBF",
+        category: "Styling Input Form",
+    },
+    inputDefaultFill: {
+        title: "Fill (Default)",
+        type: ControlType.Color,
+        defaultValue: "#FFFFFF",
+        category: "Styling Input Form",
+    },
+    inputDefaultBorderColor: {
+        title: "Border (Default)",
+        type: ControlType.Color,
+        defaultValue: "#BFBFBF",
+        category: "Styling Input Form",
+    },
+    inputDefaultBorderWidth: {
+        title: "Border Width",
+        type: ControlType.Number,
+        defaultValue: 1,
+        unit: "px",
+        min: 0,
+        category: "Styling Input Form",
+    },
+    inputFocusFill: {
+        title: "Fill (Focus)",
+        type: ControlType.Color,
+        defaultValue: "#EDF8FF",
+        category: "Styling Input Form",
+    },
+    inputFocusBorderColor: {
+        title: "Border (Focus)",
+        type: ControlType.Color,
+        defaultValue: "#0066FF",
+        category: "Styling Input Form",
+    },
+    inputInvalidFill: {
+        title: "Fill (Invalid)",
+        type: ControlType.Color,
+        defaultValue: "#FFF1F1",
+        category: "Styling Input Form",
+    },
+    inputInvalidBorderColor: {
+        title: "Border (Invalid)",
+        type: ControlType.Color,
+        defaultValue: "#E82D2F",
+        category: "Styling Input Form",
+    },
+
+    // --- [PERMINTAAN 7] Konten Modal Avatar ---
+    avatarList: {
+        title: "Daftar Avatar",
+        type: ControlType.Array,
+        control: { type: ControlType.Image },
+        defaultValue: defaultAvatarList.map((a) => a.url),
+        category: "Konten Modal Avatar",
+    },
+
+    // --- [PERMINTAAN 6] Konten Tabel Pemain ---
+    table_p1_name: {
+        title: "P1: Nama",
+        type: ControlType.String,
+        defaultValue: "Hana Sharifah",
+        category: "Konten Tabel Pemain",
+    },
+    table_p1_absen: {
+        title: "P1: No. Absen",
+        type: ControlType.Number,
+        defaultValue: 12,
+        category: "Konten Tabel Pemain",
+    },
+    table_p1_avatarUrl: {
+        title: "P1: Avatar",
+        type: ControlType.Image,
+        defaultValue: "https://placehold.co/100x100/E82D2F/FFFFFF?text=HS", // Contoh inisial
+        category: "Konten Tabel Pemain",
+    },
+    table_p1_hambatan: {
+        title: "P1: Hambatan",
+        type: ControlType.String,
+        defaultValue: "[ADHD] Attention Deficit Hyperactivity Disorder",
+        category: "Konten Tabel Pemain",
+    },
+    table_p1_email: {
+        title: "P1: Email",
+        type: ControlType.String,
+        defaultValue: "hanasharifah45@gmail.com",
+        category: "Konten Tabel Pemain",
+    },
+    table_p1_password: {
+        title: "P1: Password",
+        type: ControlType.String,
+        defaultValue: "password123",
+        category: "Konten Tabel Pemain",
+    },
+
+    table_p2_name: {
+        title: "P2: Nama",
+        type: ControlType.String,
+        defaultValue: "Danentara Kusuma",
+        category: "Konten Tabel Pemain",
+    },
+    table_p2_absen: {
+        title: "P2: No. Absen",
+        type: ControlType.Number,
+        defaultValue: 13,
+        category: "Konten Tabel Pemain",
+    },
+    table_p2_avatarUrl: {
+        title: "P2: Avatar",
+        type: ControlType.Image,
+        defaultValue: "https://placehold.co/100x100/0066FF/FFFFFF?text=DK", // Contoh inisial
+        category: "Konten Tabel Pemain",
+    },
+    table_p2_hambatan: {
+        title: "P2: Hambatan",
+        type: ControlType.String,
+        defaultValue: "[ASD] Autism Spectrum Disorder",
+        category: "Konten Tabel Pemain",
+    },
+    table_p2_email: {
+        title: "P2: Email",
+        type: ControlType.String,
+        defaultValue: "danentara.k@gmail.com",
+        category: "Konten Tabel Pemain",
+    },
+    table_p2_password: {
+        title: "P2: Password",
+        type: ControlType.String,
+        defaultValue: "password123",
+        category: "Konten Tabel Pemain",
+    },
+
+    table_p3_name: {
+        title: "P3: Nama",
+        type: ControlType.String,
+        defaultValue: "Arkana Al-Husna",
+        category: "Konten Tabel Pemain",
+    },
+    table_p3_absen: {
+        title: "P3: No. Absen",
+        type: ControlType.Number,
+        defaultValue: 14,
+        category: "Konten Tabel Pemain",
+    },
+    table_p3_avatarUrl: {
+        title: "P3: Avatar",
+        type: ControlType.Image,
+        defaultValue: "https://placehold.co/100x100/09DE1B/FFFFFF?text=AA", // Contoh inisial
+        category: "Konten Tabel Pemain",
+    },
+    table_p3_hambatan: {
+        title: "P3: Hambatan",
+        type: ControlType.String,
+        defaultValue: "[DS] Down Syndrome",
+        category: "Konten Tabel Pemain",
+    },
+    table_p3_email: {
+        title: "P3: Email",
+        type: ControlType.String,
+        defaultValue: "arkana.husna@gmail.com",
+        category: "Konten Tabel Pemain",
+    },
+    table_p3_password: {
+        title: "P3: Password",
+        type: ControlType.String,
+        defaultValue: "password123",
+        category: "Konten Tabel Pemain",
+    },
+
+    table_p4_name: {
+        title: "P4: Nama",
+        type: ControlType.String,
+        defaultValue: "Ananda Mikhail",
+        category: "Konten Tabel Pemain",
+    },
+    table_p4_absen: {
+        title: "P4: No. Absen",
+        type: ControlType.Number,
+        defaultValue: 15,
+        category: "Konten Tabel Pemain",
+    },
+    table_p4_avatarUrl: {
+        title: "P4: Avatar",
+        type: ControlType.Image,
+        defaultValue: "https://placehold.co/100x100/FFC700/FFFFFF?text=AM", // Contoh inisial
+        category: "Konten Tabel Pemain",
+    },
+    table_p4_hambatan: {
+        title: "P4: Hambatan",
+        type: ControlType.String,
+        defaultValue: "[DCD] Development Coordination Disorder",
+        category: "Konten Tabel Pemain",
+    },
+    table_p4_email: {
+        title: "P4: Email",
+        type: ControlType.String,
+        defaultValue: "",
+        category: "Konten Tabel Pemain",
+    },
+    table_p4_password: {
+        title: "P4: Password",
+        type: ControlType.String,
+        defaultValue: "",
+        category: "Konten Tabel Pemain",
+    },
+
+    table_p5_name: {
+        title: "P5: Nama",
+        type: ControlType.String,
+        defaultValue: "Agil Jordi Wardhana",
+        category: "Konten Tabel Pemain",
+    },
+    table_p5_absen: {
+        title: "P5: No. Absen",
+        type: ControlType.Number,
+        defaultValue: 16,
+        category: "Konten Tabel Pemain",
+    },
+    table_p5_avatarUrl: {
+        title: "P5: Avatar",
+        type: ControlType.Image,
+        defaultValue: "https://placehold.co/100x100/8A2BE2/FFFFFF?text=AW", // Contoh inisial
+        category: "Konten Tabel Pemain",
+    },
+    table_p5_hambatan: {
+        title: "P5: Hambatan",
+        type: ControlType.String,
+        defaultValue: "[CP] Cerebral Palsy",
+        category: "Konten Tabel Pemain",
+    },
+    table_p5_email: {
+        title: "P5: Email",
+        type: ControlType.String,
+        defaultValue: "",
+        category: "Konten Tabel Pemain",
+    },
+    table_p5_password: {
+        title: "P5: Password",
+        type: ControlType.String,
+        defaultValue: "",
+        category: "Konten Tabel Pemain",
+    },
+
+    // --- Toast Notification ---
+    showConfetti: {
+        title: "Tampilkan Confetti",
+        type: ControlType.Boolean,
+        defaultValue: true,
+        category: "Toast Notification",
+    },
+    toastAddTitle: {
+        title: "Judul Toast (Tambah)",
+        type: ControlType.String,
+        defaultValue: "Berhasil Ditambahkan!",
+        category: "Toast Notification",
+    },
+    toastAddDesc: {
+        title: "Deskripsi Toast (Tambah)",
+        type: ControlType.String,
+        defaultValue: "Pemain baru telah ditambahkan.",
+        category: "Toast Notification",
+    },
+    toastEditTitle: {
+        title: "Judul Toast (Edit)",
+        type: ControlType.String,
+        defaultValue: "Berhasil Disimpan!",
+        category: "Toast Notification",
+    },
+    toastEditDesc: {
+        title: "Deskripsi Toast (Edit)",
+        type: ControlType.String,
+        defaultValue: "Perubahan telah disimpan.",
+        category: "Toast Notification",
+    },
+    toastDeleteTitle: {
+        title: "Judul Toast (Hapus)",
+        type: ControlType.String,
+        defaultValue: "Berhasil Dihapus!",
+        category: "Toast Notification",
+    },
+    toastDeleteDesc: {
+        title: "Deskripsi Toast (Hapus)",
+        type: ControlType.String,
+        defaultValue: "Pemain telah dihapus.",
+        category: "Toast Notification",
+    },
+
+    toastColor: {
+        title: "Warna BG Toast",
+        type: ControlType.Color,
+        defaultValue: "#EEFFEE",
+        category: "Toast Notification",
+    },
+    toastIconColor: {
+        title: "Warna Ikon Toast",
+        type: ControlType.Color,
+        defaultValue: "#09DE1B",
+        category: "Toast Notification",
+    },
+    toastBorderColor: {
+        title: "Warna Border Toast",
+        type: ControlType.Color,
+        defaultValue: "#09DE1B",
+        category: "Toast Notification",
+    },
+    toastTitleColor: {
+        title: "Warna Judul Toast",
+        type: ControlType.Color,
+        defaultValue: "#09DE1B",
+        category: "Toast Notification",
+    },
+    toastMessageColor: {
+        title: "Warna Pesan Toast",
+        type: ControlType.Color,
+        defaultValue: "#2D3748",
+        category: "Toast Notification",
+    },
+})
